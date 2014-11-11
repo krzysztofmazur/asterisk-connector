@@ -5,13 +5,13 @@ import pl.ychu.asterisk.ami.Action;
 /**
  * Created by Krzysztof on 2014-11-11.
  */
-public class Login extends Action {
+public final class Login extends Action {
 
     private String userName;
     private String password;
     private boolean events;
 
-    protected Login() {
+    private Login() {
     }
 
     public Login(String userName, String password, boolean events) {
@@ -21,7 +21,7 @@ public class Login extends Action {
     }
 
     @Override
-    public String getMessage() {
+    protected String getMessage() {
         if (events) {
             return "Action: Login\n"
                     + "Username: " + userName + "\n"

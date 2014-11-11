@@ -6,7 +6,7 @@ package pl.ychu.asterisk.ami;
 abstract public class Action {
     protected String actionId;
 
-    public abstract String getMessage();
+    protected abstract String getMessage();
 
     public String getActionId() {
         return actionId;
