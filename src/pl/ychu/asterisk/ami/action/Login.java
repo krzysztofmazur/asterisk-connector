@@ -22,15 +22,9 @@ public final class Login extends Action {
 
     @Override
     protected String getMessage() {
-        if (events) {
-            return "Action: Login\n"
-                    + "Username: " + userName + "\n"
-                    + "Secret: " + password + "\n";
-        } else {
-            return "Action: Login\n"
-                    + "Username: " + userName + "\n"
-                    + "Secret: " + password + "\n"
-                    + "Events: off\n";
-        }
+        return "Action: Login\n"
+                + "Username: " + userName + "\n"
+                + "Secret: " + password + "\n"
+                + (events ? "" : "Events: off\n") + "\n";
     }
 }
