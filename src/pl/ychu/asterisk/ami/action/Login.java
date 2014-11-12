@@ -25,6 +25,6 @@ public final class Login extends Action {
         return "Action: Login\n"
                 + "Username: " + userName + "\n"
                 + "Secret: " + password + "\n"
-                + (events ? "" : "Events: off\n") + "\n";
+                + (events ? "" : "Events: off\n");
     }
 }

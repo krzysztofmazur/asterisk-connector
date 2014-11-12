@@ -4,18 +4,18 @@ package pl.ychu.asterisk.ami;
  * Created by Krzysztof on 2014-11-10.
  */
 public class ActionId {
-    private static long actionId;
-    private static Object mutex;
+    private long actionId;
+    private Object mutex;
 
-    static {
+    public ActionId() {
         actionId = 0;
         mutex = new Object();
     }
 
-    public static String getNext() {
+    public String getNext() {
         synchronized (mutex) {
-            ActionId.actionId++;
-            return System.currentTimeMillis() + String.format("%09d", ActionId.actionId);
+            this.actionId++;
+            return System.currentTimeMillis() + String.format("%09d", this.actionId);
         }
     }
 }
