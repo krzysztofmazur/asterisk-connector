@@ -9,9 +9,6 @@ public final class Command extends Action {
 
     private String command;
 
-    protected Command() {
-    }
-
     public Command(String command) {
         this.command = command;
     }

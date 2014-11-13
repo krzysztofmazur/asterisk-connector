@@ -1,6 +1,8 @@
 package pl.ychu.asterisk.ami;
 
 import pl.ychu.asterisk.AsteriskConfiguration;
+import pl.ychu.asterisk.ami.action.AbsoluteTimeout;
+import pl.ychu.asterisk.ami.action.AgentLogoff;
 import pl.ychu.asterisk.ami.action.ListCommands;
 import pl.ychu.asterisk.ami.action.Login;
 

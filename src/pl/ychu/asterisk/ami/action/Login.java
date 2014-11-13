@@ -11,9 +11,6 @@ public final class Login extends Action {
     private String password;
     private boolean events;
 
-    private Login() {
-    }
-
     public Login(String userName, String password, boolean events) {
         this.userName = userName;
         this.password = password;
