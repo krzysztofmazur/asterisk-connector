@@ -40,15 +40,15 @@ public class Originate extends Action {
         return "Action: Originate\n"
                 + "Channel: " + channel + "\n"
                 + (exten != null ? "Mix: " + exten + "\n" : "")
-                + (context != null ? "Mix: " + context + "\n" : "")
-                + (priority != -1 ? "Mix: " + priority + "\n" : "")
-                + (application != null ? "Mix: " + application + "\n" : "")
-                + (data != null ? "Mix: " + data + "\n" : "")
-                + (timeout != -1 ? "Mix: " + timeout + "\n" : "")
-                + (callerId != null ? "Mix: " + callerId + "\n" : "")
-                + (variable != null ? "Mix: " + variable + "\n" : "")
-                + (account != null ? "Mix: " + account + "\n" : "")
-                + (async != null ? "Mix: " + async + "\n" : "")
-                + (codecs != null ? "Mix: " + codecs + "\n" : "");
+                + (context != null ? "Context: " + context + "\n" : "")
+                + (priority != -1 ? "Priority: " + priority + "\n" : "")
+                + (application != null ? "Application: " + application + "\n" : "")
+                + (data != null ? "Data: " + data + "\n" : "")
+                + (timeout != -1 ? "Timeout: " + timeout + "\n" : "")
+                + (callerId != null ? "CallerID: " + callerId + "\n" : "")
+                + (variable != null ? "Variable: " + variable + "\n" : "")
+                + (account != null ? "Account: " + account + "\n" : "")
+                + (async != null ? "Async: " + async + "\n" : "")
+                + (codecs != null ? "Codecs: " + codecs + "\n" : "");
     }
 }
