@@ -5,15 +5,13 @@ package pl.ychu.asterisk.ami;
  */
 public class ActionId {
     private long actionId;
-    private Object mutex;
 
     public ActionId() {
         actionId = 0;
-        mutex = new Object();
     }
 
     public String getNext() {
-        synchronized (mutex) {
+        synchronized (this) {
             this.actionId++;
             return System.currentTimeMillis() + String.format("%09d", this.actionId);
         }
