@@ -27,6 +27,7 @@ public class Connector {
     private boolean listenEvents;
     private final Object mutex;
 
+
     protected Connector() {
         this.mutex = new Object();
         this.handlers = new ArrayList<EventHandler>();
@@ -66,20 +67,11 @@ public class Connector {
                             while (!Thread.currentThread().isInterrupted()) {
                                 message = reader.readMessage();
                                 if (eventPattern.matcher(message).find()) {
-                                    Event e = Event.parseEvent(message);
-                                    synchronized (mutex) {
-                                        for (EventHandler handler : handlers) {
-                                            new Thread(new EventAsyncHelper(e, handler)).start();
-                                        }
-                                    }
+                                    processEvent(message);
                                     continue;
                                 }
                                 if (responsePattern.matcher(message).find()) {
-                                    Response r = new Response(message);
-                                    ResponseHandler handler = toSend.remove(r.getActionId());
-                                    if (handler != null) {
-                                        new Thread(new ResponseAsyncHelper(r, handler)).start();
-                                    }
+                                    processResponse(message);
                                     continue;
                                 }
                             }
@@ -91,6 +83,29 @@ public class Connector {
                 }
             }
         };
+    }
+
+    private void processEvent(String message) {
+        Event e = Event.parseEvent(message);
+        synchronized (mutex) {
+            for (EventHandler handler : handlers) {
+                new Thread(new EventAsyncHelper(e, handler)).start();
+            }
+        }
+    }
+
+    private void processResponse(String message) {
+        Response r = new Response(message);
+        ResponseHandler handler = toSend.remove(r.getActionId());
+        if (handler != null) {
+            new Thread(new ResponseAsyncHelper(r, handler)).start();
+        } else {
+            synchronized (mutex) {
+                for (EventHandler evHandler : handlers) {
+                    new Thread(new DefaultResponseAsyncHelper(r, evHandler)).start();
+                }
+            }
+        }
     }
 
     public void addEventHandler(EventHandler handler) {
@@ -128,16 +143,22 @@ public class Connector {
         Connector conn = new Connector(conf, new EventHandler() {
             @Override
             public void handleEvent(Event event) {
-                System.out.println(event.getMessage());
+                System.out.println(event.getEventName());
             }
-        }, true);
-        Thread.sleep(1000);
-        conn.sendAction(new QueueStatus(null, null), new ResponseHandler() {
+
             @Override
-            public void onResponse(Response response) {
+            public void handleResponse(Response response) {
+                System.out.println(response.getMessage());
+            }
+        }, false);
+        Thread.sleep(1000);
+        conn.sendAction(new ListCommands());
+        /*conn.sendAction(new Command("sip show peers"), new ResponseHandler() {
+            @Override
+            public void handleResponse(Response response) {
                 System.out.print(response.getMessage());
             }
-        });
+        });*/
     }
 
     private class ResponseAsyncHelper implements Runnable {
@@ -152,7 +173,22 @@ public class Connector {
 
         @Override
         public void run() {
-            handler.onResponse(response);
+            handler.handleResponse(response);
+        }
+    }
+
+    private class DefaultResponseAsyncHelper implements Runnable {
+        private Response response;
+        private EventHandler handler;
+
+        public DefaultResponseAsyncHelper(Response response, EventHandler handler) {
+            this.response = response;
+            this.handler = handler;
+        }
+
+        @Override
+        public void run() {
+            handler.handleResponse(response);
         }
     }
 
