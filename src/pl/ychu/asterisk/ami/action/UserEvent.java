@@ -12,8 +12,9 @@ public class UserEvent extends Action {
     private String userEvent;
     private HashMap<String, String> headers;
 
-    public UserEvent(String userEvent) {
+    public UserEvent(String userEvent, HashMap<String, String> headers) {
         this.userEvent = userEvent;
+        this.headers = headers;
     }
 
     @Override
