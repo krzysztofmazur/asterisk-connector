@@ -1,10 +1,7 @@
 package pl.ychu.asterisk.ami;
 
 import pl.ychu.asterisk.AsteriskConfiguration;
-import pl.ychu.asterisk.ami.action.AbsoluteTimeout;
-import pl.ychu.asterisk.ami.action.AgentLogoff;
-import pl.ychu.asterisk.ami.action.ListCommands;
-import pl.ychu.asterisk.ami.action.Login;
+import pl.ychu.asterisk.ami.action.*;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -20,7 +17,6 @@ public class Connector {
     private ArrayList<EventHandler> handlers;
     private AsteriskConfiguration configuration;
     private Socket client;
-    private boolean running;
     private Thread mainThread;
     private Reader reader;
     private Writer writer;
@@ -28,24 +24,28 @@ public class Connector {
     private HashMap<String, ResponseHandler> toSend;
     private Pattern eventPattern;
     private Pattern responsePattern;
+    private boolean listenEvents;
+    private final Object mutex;
 
     protected Connector() {
-
-    }
-
-    public Connector(AsteriskConfiguration configuration) throws IOException {
-        this.configuration = configuration;
+        this.mutex = new Object();
         this.handlers = new ArrayList<EventHandler>();
-        this.client = new Socket();
         this.actionIdFactory = new ActionId();
+        this.client = new Socket();
         this.toSend = new HashMap<String, ResponseHandler>();
         this.eventPattern = Pattern.compile("^(Event:).*");
         this.responsePattern = Pattern.compile("^(Response:).*");
+    }
+
+    public Connector(AsteriskConfiguration configuration, boolean listenEvents) throws IOException {
+        this();
+        this.configuration = configuration;
+        this.listenEvents = listenEvents;
         this.createThread();
     }
 
-    public Connector(AsteriskConfiguration configuration, EventHandler handler) throws IOException {
-        this(configuration);
+    public Connector(AsteriskConfiguration configuration, EventHandler handler, boolean listenEvents) throws IOException {
+        this(configuration, listenEvents);
         this.addEventHandler(handler);
         this.start();
     }
@@ -55,20 +55,22 @@ public class Connector {
             @Override
             public void run() {
                 try {
-                    while (running) {
+                    while (!Thread.currentThread().isInterrupted()) {
                         client.connect(new InetSocketAddress(configuration.getHostName(), configuration.getHostPort()));
                         reader = new Reader(client.getInputStream());
                         writer = new Writer(client.getOutputStream());
-                        Login l = new Login(configuration.getUserName(), configuration.getUserPassword(), true);
+                        Login l = new Login(configuration.getUserName(), configuration.getUserPassword(), listenEvents);
                         writer.send(l);
                         String message = reader.readMessage();
                         if (message.contains("Success")) {
-                            while (running) {
+                            while (!Thread.currentThread().isInterrupted()) {
                                 message = reader.readMessage();
                                 if (eventPattern.matcher(message).find()) {
                                     Event e = Event.parseEvent(message);
-                                    for (EventHandler handler : handlers) {
-                                        new Thread(new EventAsyncHelper(e, handler)).start();
+                                    synchronized (mutex) {
+                                        for (EventHandler handler : handlers) {
+                                            new Thread(new EventAsyncHelper(e, handler)).start();
+                                        }
                                     }
                                     continue;
                                 }
@@ -82,33 +84,33 @@ public class Connector {
                                 }
                             }
                         } else {
-                            running = false;
                             break;
                         }
                     }
                 } catch (IOException ex) {
-                    running = false;
                 }
             }
         };
     }
 
     public void addEventHandler(EventHandler handler) {
-        handlers.add(handler);
+        synchronized (mutex) {
+            handlers.add(handler);
+        }
     }
 
     public void removeEventHandler(EventHandler handler) {
-        handlers.remove(handler);
+        synchronized (mutex) {
+            handlers.remove(handler);
+        }
     }
 
     public void start() {
-        this.running = true;
-        this.mainThread.start();
+        mainThread.start();
     }
 
     public void stop() {
-        this.running = false;
-        this.mainThread.interrupt();
+        mainThread.interrupt();
     }
 
     public void sendAction(Action action) throws IOException {
@@ -128,9 +130,9 @@ public class Connector {
             public void handleEvent(Event event) {
                 System.out.println(event.getMessage());
             }
-        });
+        }, true);
         Thread.sleep(1000);
-        conn.sendAction(new ListCommands(), new ResponseHandler() {
+        conn.sendAction(new QueueStatus(null, null), new ResponseHandler() {
             @Override
             public void onResponse(Response response) {
                 System.out.print(response.getMessage());

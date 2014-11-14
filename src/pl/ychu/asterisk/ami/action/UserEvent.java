@@ -3,7 +3,6 @@ package pl.ychu.asterisk.ami.action;
 import pl.ychu.asterisk.ami.Action;
 
 import java.util.HashMap;
-import java.util.Iterator;
 
 /**
  * Created by Krzysztof on 2014-11-14.

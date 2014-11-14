@@ -18,6 +18,8 @@ public class Writer {
     }
 
     public void send(Action action) throws IOException {
-        os.write(action.getBytes());
+        synchronized (this) {
+            os.write(action.getBytes());
+        }
     }
 }
