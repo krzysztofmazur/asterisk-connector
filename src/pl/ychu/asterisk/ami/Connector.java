@@ -1,9 +1,9 @@
 package pl.ychu.asterisk.ami;
 
-import pl.ychu.asterisk.ami.action.*;
+import pl.ychu.asterisk.ami.action.Login;
+import pl.ychu.asterisk.ami.action.Ping;
 
 import java.io.IOException;
-import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -18,6 +18,7 @@ public class Connector {
     private Configuration configuration;
     private Socket client;
     private Thread mainThread;
+    private Thread maintainingThread;
     private Reader reader;
     private Writer writer;
     private ActionId actionIdFactory;
@@ -27,6 +28,8 @@ public class Connector {
     private boolean listenEvents;
     private final Object mutex;
     private boolean connected;
+    private int readTimeout = 30000;
+    private int connectTimeout = 5000;
 
     protected Connector() {
         this.mutex = new Object();
@@ -42,6 +45,7 @@ public class Connector {
         this();
         this.configuration = configuration;
         this.listenEvents = listenEvents;
+        this.createMaintainingThread();
         this.createThread();
     }
 
@@ -51,6 +55,44 @@ public class Connector {
         this.start();
     }
 
+    public int getConnectTimeout() {
+        return connectTimeout;
+    }
+
+    public void setConnectTimeout(int connectTimeout) {
+        this.connectTimeout = connectTimeout;
+    }
+
+    public int getReadTimeout() {
+        return readTimeout * 2;
+    }
+
+    public void setReadTimeout(int readTimeout) {
+        this.readTimeout = readTimeout / 2;
+    }
+
+    private void createMaintainingThread() {
+        maintainingThread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while (!Thread.currentThread().isInterrupted()) {
+                    try {
+                        Thread.sleep(readTimeout);
+                    } catch (InterruptedException ex) {
+                        break;
+                    }
+                    try {
+                        if (writer != null && connected) {
+                            writer.send(new Ping());
+                        }
+                    } catch (IOException ex) {
+                        ex.printStackTrace();
+                    }
+                }
+            }
+        });
+    }
+
     private void createThread() {
         this.mainThread = new Thread() {
             @Override
@@ -58,8 +100,8 @@ public class Connector {
                 while (!Thread.currentThread().isInterrupted()) {
                     try {
                         client = new Socket();
-                        client.setSoTimeout(5000);
-                        client.connect(new InetSocketAddress(configuration.getHostName(), configuration.getHostPort()), 5000);
+                        client.setSoTimeout(readTimeout);
+                        client.connect(new InetSocketAddress(configuration.getHostName(), configuration.getHostPort()), connectTimeout);
                         reader = new Reader(client.getInputStream());
                         writer = new Writer(client.getOutputStream());
                         connected = true;
@@ -155,6 +197,14 @@ public class Connector {
         return connected;
     }
 
+    public void startMaintainingThread() {
+        maintainingThread.start();
+    }
+
+    public void stopMaintainingThread() {
+        maintainingThread.interrupt();
+    }
+
     public static void main(String[] args) throws IOException, InterruptedException {
         final Configuration conf = new Configuration("192.168.24.4", 5038, "admin", "holi!holi9");
         final Connector conn = new Connector(conf, new EventHandler() {
@@ -168,6 +218,7 @@ public class Connector {
                 System.out.println(response.getMessage());
             }
         }, true);
+        conn.startMaintainingThread();
     }
 
     private class ResponseAsyncHelper implements Runnable {

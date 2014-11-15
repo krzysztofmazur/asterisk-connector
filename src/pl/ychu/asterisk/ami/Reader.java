@@ -9,21 +9,21 @@ import java.io.InputStreamReader;
  */
 public class Reader {
 
-    private InputStreamReader bf;
+    private InputStream is;
     private StringBuilder sb;
 
     protected Reader() {
     }
 
     public Reader(InputStream is) {
-        bf = new InputStreamReader(is);
+        this.is = is;
     }
 
     public String readMessage() throws IOException {
         sb = new StringBuilder(200);
         char last;
         while (true) {
-            last = (char) bf.read();
+            last = (char) is.read();
             sb.append(last);
             if (sb.length() > 3) {
                 int tmpPos = sb.length();
@@ -36,6 +36,6 @@ public class Reader {
     }
 
     public void close() throws IOException {
-        bf.close();
+        is.close();
     }
 }
