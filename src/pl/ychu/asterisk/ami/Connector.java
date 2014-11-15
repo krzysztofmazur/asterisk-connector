@@ -1,13 +1,17 @@
 package pl.ychu.asterisk.ami;
 
+import pl.ychu.asterisk.ami.action.Command;
+import pl.ychu.asterisk.ami.action.ListCommands;
 import pl.ychu.asterisk.ami.action.Login;
 import pl.ychu.asterisk.ami.action.Ping;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.concurrent.TimeoutException;
 import java.util.regex.Pattern;
 
 /**
@@ -68,6 +72,13 @@ public class Connector {
     }
 
     public void setReadTimeout(int readTimeout) {
+        if (client != null) {
+            try {
+                client.setSoTimeout(readTimeout);
+            } catch (SocketException ex) {
+                ex.printStackTrace();
+            }
+        }
         this.readTimeout = readTimeout / 2;
     }
 
@@ -100,7 +111,7 @@ public class Connector {
                 while (!Thread.currentThread().isInterrupted()) {
                     try {
                         client = new Socket();
-                        client.setSoTimeout(readTimeout);
+                        client.setSoTimeout(readTimeout * 2);
                         client.connect(new InetSocketAddress(configuration.getHostName(), configuration.getHostPort()), connectTimeout);
                         reader = new Reader(client.getInputStream());
                         writer = new Writer(client.getOutputStream());
@@ -205,7 +216,7 @@ public class Connector {
         maintainingThread.interrupt();
     }
 
-    public static void main(String[] args) throws IOException, InterruptedException {
+    public static void main(String[] args) throws IOException, InterruptedException, TimeoutException {
         final Configuration conf = new Configuration("192.168.24.4", 5038, "admin", "holi!holi9");
         final Connector conn = new Connector(conf, new EventHandler() {
             @Override
@@ -215,10 +226,16 @@ public class Connector {
 
             @Override
             public void handleResponse(Response response) {
-                System.out.println(response.getMessage());
+                //System.out.println(response.getMessage());
             }
         }, true);
         conn.startMaintainingThread();
+        SynchronizedActionSender actionSender = new SynchronizedActionSender(conn);
+        long star = System.currentTimeMillis();
+        Response response = actionSender.send(new Command("sip show peers"));
+        System.out.println("Execution time: " + (System.currentTimeMillis() - star) + " ms");
+        System.out.println("Message length: " + response.getMessage().length() + " b");
+        conn.stop();
     }
 
     private class ResponseAsyncHelper implements Runnable {
