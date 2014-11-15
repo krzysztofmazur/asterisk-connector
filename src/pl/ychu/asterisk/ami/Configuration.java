@@ -1,18 +1,18 @@
-package pl.ychu.asterisk;
+package pl.ychu.asterisk.ami;
 
 /**
  * Created by Krzysztof on 2014-11-10.
  */
-public class AsteriskConfiguration {
+public class Configuration {
     private String hostName;
     private String userName;
     private String userPassword;
     private int hostPort;
 
-    protected AsteriskConfiguration() {
+    protected Configuration() {
     }
 
-    public AsteriskConfiguration(String hostName, int hostPort, String userName, String userPassword) {
+    public Configuration(String hostName, int hostPort, String userName, String userPassword) {
         this.hostName = hostName;
         this.userName = userName;
         this.userPassword = userPassword;
@@ -53,7 +53,7 @@ public class AsteriskConfiguration {
 
     @Override
     public String toString() {
-        return "AsteriskConfiguration{" +
+        return "Configuration{" +
                 "hostName='" + hostName + '\'' +
                 ", userName='" + userName + '\'' +
                 ", userPassword='" + userPassword + '\'' +

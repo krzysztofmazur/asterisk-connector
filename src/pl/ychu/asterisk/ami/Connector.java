@@ -1,6 +1,5 @@
 package pl.ychu.asterisk.ami;
 
-import pl.ychu.asterisk.AsteriskConfiguration;
 import pl.ychu.asterisk.ami.action.*;
 
 import java.io.IOException;
@@ -15,7 +14,7 @@ import java.util.regex.Pattern;
  */
 public class Connector {
     private ArrayList<EventHandler> handlers;
-    private AsteriskConfiguration configuration;
+    private Configuration configuration;
     private Socket client;
     private Thread mainThread;
     private Reader reader;
@@ -38,14 +37,14 @@ public class Connector {
         this.responsePattern = Pattern.compile("^(Response:).*");
     }
 
-    public Connector(AsteriskConfiguration configuration, boolean listenEvents) throws IOException {
+    public Connector(Configuration configuration, boolean listenEvents) throws IOException {
         this();
         this.configuration = configuration;
         this.listenEvents = listenEvents;
         this.createThread();
     }
 
-    public Connector(AsteriskConfiguration configuration, EventHandler handler, boolean listenEvents) throws IOException {
+    public Connector(Configuration configuration, EventHandler handler, boolean listenEvents) throws IOException {
         this(configuration, listenEvents);
         this.addEventHandler(handler);
         this.start();
@@ -119,7 +118,6 @@ public class Connector {
             handlers.remove(handler);
         }
     }
-
     public void start() {
         mainThread.start();
     }
@@ -139,7 +137,7 @@ public class Connector {
     }
 
     public static void main(String[] args) throws IOException, InterruptedException {
-        AsteriskConfiguration conf = new AsteriskConfiguration("192.168.24.4", 5038, "admin", "holi!holi9");
+        Configuration conf = new Configuration("192.168.24.4", 5038, "admin", "holi!holi9");
         Connector conn = new Connector(conf, new EventHandler() {
             @Override
             public void handleEvent(Event event) {
