@@ -50,4 +50,5 @@ public class Response {
     public String getActionId() {
         return this.getVariable("ActionID");
     }
+
 }
