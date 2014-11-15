@@ -34,4 +34,8 @@ public class Reader {
         }
         return sb.toString();
     }
+
+    public void close() throws IOException {
+        bf.close();
+    }
 }

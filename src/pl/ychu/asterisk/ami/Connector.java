@@ -3,6 +3,7 @@ package pl.ychu.asterisk.ami;
 import pl.ychu.asterisk.ami.action.*;
 
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -25,16 +26,16 @@ public class Connector {
     private Pattern responsePattern;
     private boolean listenEvents;
     private final Object mutex;
-
+    private boolean connected;
 
     protected Connector() {
         this.mutex = new Object();
         this.handlers = new ArrayList<EventHandler>();
         this.actionIdFactory = new ActionId();
-        this.client = new Socket();
         this.toSend = new HashMap<String, ResponseHandler>();
         this.eventPattern = Pattern.compile("^(Event:).*");
         this.responsePattern = Pattern.compile("^(Response:).*");
+        this.connected = false;
     }
 
     public Connector(Configuration configuration, boolean listenEvents) throws IOException {
@@ -54,11 +55,14 @@ public class Connector {
         this.mainThread = new Thread() {
             @Override
             public void run() {
-                try {
-                    while (!Thread.currentThread().isInterrupted()) {
-                        client.connect(new InetSocketAddress(configuration.getHostName(), configuration.getHostPort()));
+                while (!Thread.currentThread().isInterrupted()) {
+                    try {
+                        client = new Socket();
+                        client.setSoTimeout(5000);
+                        client.connect(new InetSocketAddress(configuration.getHostName(), configuration.getHostPort()), 5000);
                         reader = new Reader(client.getInputStream());
                         writer = new Writer(client.getOutputStream());
+                        connected = true;
                         Login l = new Login(configuration.getUserName(), configuration.getUserPassword(), listenEvents);
                         writer.send(l);
                         String message = reader.readMessage();
@@ -75,10 +79,20 @@ public class Connector {
                                 }
                             }
                         } else {
+                            reader.close();
+                            writer.close();
+                            client.close();
                             break;
                         }
+                    } catch (IOException ex) {
+                        ex.printStackTrace();
+                        try {
+                            Thread.sleep(1000);
+                        } catch (InterruptedException e) {
+                            break;
+                        }
+                        connected = false;
                     }
-                } catch (IOException ex) {
                 }
             }
         };
@@ -118,6 +132,7 @@ public class Connector {
             handlers.remove(handler);
         }
     }
+
     public void start() {
         mainThread.start();
     }
@@ -136,27 +151,23 @@ public class Connector {
         writer.send(action);
     }
 
+    public boolean isConnected() {
+        return connected;
+    }
+
     public static void main(String[] args) throws IOException, InterruptedException {
-        Configuration conf = new Configuration("192.168.24.4", 5038, "admin", "holi!holi9");
-        Connector conn = new Connector(conf, new EventHandler() {
+        final Configuration conf = new Configuration("192.168.24.4", 5038, "admin", "holi!holi9");
+        final Connector conn = new Connector(conf, new EventHandler() {
             @Override
             public void handleEvent(Event event) {
-                System.out.println(event.getEventName());
+                //System.out.println(System.currentTimeMillis() + ": " + event.getEventName());
             }
 
             @Override
             public void handleResponse(Response response) {
                 System.out.println(response.getMessage());
             }
-        }, false);
-        Thread.sleep(1000);
-        conn.sendAction(new ListCommands());
-        /*conn.sendAction(new Command("sip show peers"), new ResponseHandler() {
-            @Override
-            public void handleResponse(Response response) {
-                System.out.print(response.getMessage());
-            }
-        });*/
+        }, true);
     }
 
     private class ResponseAsyncHelper implements Runnable {

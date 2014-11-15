@@ -22,4 +22,8 @@ public class Writer {
             os.write(action.getBytes());
         }
     }
+
+    public void close() throws IOException {
+        os.close();
+    }
 }
