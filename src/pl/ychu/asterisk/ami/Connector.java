@@ -13,7 +13,7 @@ import java.util.concurrent.TimeoutException;
 import java.util.regex.Pattern;
 
 /**
- * Created by Krzysztof on 2014-11-10.
+ * Klasa służąca do podłączenia się do interfejsu AMI.
  */
 public class Connector {
     private ArrayList<EventHandler> handlers;
