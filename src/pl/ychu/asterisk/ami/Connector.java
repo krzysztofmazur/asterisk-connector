@@ -45,6 +45,13 @@ public class Connector {
         this.connected = false;
     }
 
+    /**
+     * Podstawowy konstruktor.
+     *
+     * @param configuration Konfiguracja połączenia do asteriska.
+     * @param listenEvents  Argument decydujący czy będą nasłuchiwane eventy. Jeśli nie to odczytywane będą tylko
+     *                      odpowiedzi na wysłane akcje.
+     */
     public Connector(Configuration configuration, boolean listenEvents) {
         this();
         this.configuration = configuration;
@@ -53,6 +60,14 @@ public class Connector {
         this.createThread();
     }
 
+    /**
+     * Podstawowy konstruktor, do którego w parametrze przekazujemy obiekt służący do nasłuchiwania eventów.
+     *
+     * @param configuration Konfiguracja połączenia do asteriska.
+     * @param handler       Obiekt implementujący interface EventHandler.
+     * @param listenEvents  Argument decydujący czy będą nasłuchiwane eventy. Jeśli nie to odczytywane będą tylko
+     *                      odpowiedzi na wysłane akcje.
+     */
     public Connector(Configuration configuration, EventHandler handler, boolean listenEvents) {
         this(configuration, listenEvents);
         this.addEventHandler(handler);
@@ -97,9 +112,9 @@ public class Connector {
                         try {
                             Thread.sleep(1000);
                         } catch (InterruptedException e) {
-                            break;
                         }
                     } catch (NotAuthorizedException e) {
+                        connected = false;
                         break;
                     }
                 }
@@ -156,18 +171,37 @@ public class Connector {
         }
     }
 
+    /**
+     * @return Timeout dla połączenia do asteriska w milisekundach.
+     */
     public int getConnectTimeout() {
         return connectTimeout;
     }
 
+    /**
+     * Metoda ustawia timeout dla połączenia do asteriska. Jeśli nie jest wywoływana to wartość domyślna wynosi 5000
+     * ms.
+     *
+     * @param connectTimeout Timeout dla połączenia do asteriska w milisekundach.
+     */
     public void setConnectTimeout(int connectTimeout) {
         this.connectTimeout = connectTimeout;
     }
 
+    /**
+     * @return Timeout dla odczytania kolejnego znaku z AMI.
+     */
     public int getReadTimeout() {
         return readTimeout * 2;
     }
 
+    /**
+     * Metoda ustawia timeout dla odczytania kolejnego znaku z AMI. Domyślna wartość to 30 s.
+     *
+     * @param readTimeout Timeout dla odczytania kolejnego znaku z AMI w milisekundach.
+     * @throws IOException Wyjątek może wystąpić jeżeli przed wykonaniem tej metody została wykonana metoda start(), ale
+     *                     połączenie nie zostało zestawione.
+     */
     public void setReadTimeout(int readTimeout) throws IOException {
         if (client != null) {
             client.setSoTimeout(readTimeout);
@@ -175,18 +209,36 @@ public class Connector {
         this.readTimeout = readTimeout / 2;
     }
 
+    /**
+     * Metoda dodaje obiekt nasłuchujący eventy z asteriska. Wszystkie przekazane przez tą metodę obiekty będą używane
+     * do przesyłania eventów.
+     *
+     * @param handler Obiekt implementujący interface EventHandler.
+     */
     public void addEventHandler(EventHandler handler) {
         synchronized (mutex) {
             handlers.add(handler);
         }
     }
 
+    /**
+     * Metoda usuwa obiekt nasłuchujący eventy z asteriska.
+     *
+     * @param handler Referencja do przekazanego wcześniej obiektu implementującego interfejs EventHandler.
+     */
     public void removeEventHandler(EventHandler handler) {
         synchronized (mutex) {
             handlers.remove(handler);
         }
     }
 
+    /**
+     * Metoda służy do połączenia obiektu do asteriska. Jeśli połączenie zostanie nawiązane i dane logowania
+     * będą poprawne to zostaje uruchomiony wątek nasłuchujący eventy i odpowiedzi na przesłane żądania.
+     *
+     * @throws IOException            Wywoływany gdy na przekazanym hości i porcie nie udało się ustanowić połączenia.
+     * @throws NotAuthorizedException Wywoływany gdy hasło lub login przekazane w konfiguracji są nieprawidłowe.
+     */
     public void start() throws IOException, NotAuthorizedException {
         this.connect();
         mainThread.start();
@@ -195,6 +247,9 @@ public class Connector {
         }
     }
 
+    /**
+     * Medtoda sługży do zatrzymania wątków nasłuchujących eventów i podtrzymujących połączenie.
+     */
     public void stop() {
         mainThread.interrupt();
         if (this.configuration.isEnabledMaintainingThread() && maintainingThread.isAlive()) {
@@ -202,16 +257,35 @@ public class Connector {
         }
     }
 
+    /**
+     * Metoda wysyła akcję do asteriska. Odpowiedź zostanie zwrócona do wszystkich przekazanych obiektów nasłuchujących
+     * eventów z asteriska do metody handleResponse().
+     *
+     * @param action Obiekt roszerzający klasę Action.
+     * @throws IOException Wywoływany jeśli metoda jest wywołana gdy nie zostało ustanowione połączenie do asteriska.
+     */
     public void sendAction(Action action) throws IOException {
         writer.send(action);
     }
 
+    /**
+     * Metoda wysyła akcję do asteriska. Odpowiedź zostanie zwrócona tylko do objektu implementującego ResponseHandler,
+     * który został przekazany w parametrze.
+     *
+     * @param action  Obiekt roszerzający klasę Action.
+     * @param handler Obiekt implementujący ResponseHandler, w którym zostanie wywołana metoda handleResponse() w
+     *                momencie otrzymania odpowiedzi.
+     * @throws IOException Wywoływany jeśli metoda jest wywołana gdy nie zostało ustanowione połączenie do asteriska.
+     */
     public void sendAction(Action action, ResponseHandler handler) throws IOException {
         action.setActionId(this.actionIdFactory.getNext());
         toSend.put(action.getActionId(), handler);
         writer.send(action);
     }
 
+    /**
+     * @return Wartość true lub false informujący czy zostało nawiązane połączenie do asteriska.
+     */
     public boolean isConnected() {
         return connected;
     }
