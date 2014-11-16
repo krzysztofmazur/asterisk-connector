@@ -1,7 +1,5 @@
 package pl.ychu.asterisk.ami;
 
-import jdk.nashorn.internal.runtime.regexp.joni.exception.InternalException;
-
 import java.io.IOException;
 import java.util.concurrent.TimeoutException;
 
@@ -20,24 +18,39 @@ public class SynchronizedActionSender {
     }
 
     public Response send(Action action, int timeout) throws InterruptedException, TimeoutException, IOException {
-        final ResponseSyncSenderHelper helper = new ResponseSyncSenderHelper();
+        final ActionSyncSenderHelper helper = new ActionSyncSenderHelper();
         connector.sendAction(action, new ResponseHandler() {
             @Override
             public void handleResponse(Response response) {
-                helper.response = response;
+                helper.setResponse(response);
             }
         });
-        long startTime = System.currentTimeMillis();
-        while (startTime + timeout > System.currentTimeMillis()) {
-            if (helper.response != null) {
-                return helper.response;
+        long startTime = System.currentTimeMillis() + timeout;
+        while (startTime > System.currentTimeMillis()) {
+            if (helper.hasResponse()) {
+                return helper.getResponse();
             }
             Thread.sleep(1);
         }
         throw new TimeoutException();
     }
 
-    private class ResponseSyncSenderHelper {
-        public Response response;
+    private class ActionSyncSenderHelper {
+        private Response response;
+
+        public ActionSyncSenderHelper() {
+        }
+
+        public Response getResponse() {
+            return response;
+        }
+
+        public void setResponse(Response response) {
+            this.response = response;
+        }
+
+        public boolean hasResponse() {
+            return response != null;
+        }
     }
 }

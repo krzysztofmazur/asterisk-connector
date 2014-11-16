@@ -1,14 +1,12 @@
 package pl.ychu.asterisk.ami;
 
 import pl.ychu.asterisk.ami.action.Command;
-import pl.ychu.asterisk.ami.action.ListCommands;
 import pl.ychu.asterisk.ami.action.Login;
 import pl.ychu.asterisk.ami.action.Ping;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
-import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.concurrent.TimeoutException;
@@ -29,6 +27,7 @@ public class Connector {
     private HashMap<String, ResponseHandler> toSend;
     private Pattern eventPattern;
     private Pattern responsePattern;
+    private Pattern loginPattern;
     private boolean listenEvents;
     private final Object mutex;
     private boolean connected;
@@ -42,10 +41,11 @@ public class Connector {
         this.toSend = new HashMap<String, ResponseHandler>();
         this.eventPattern = Pattern.compile("^(Event:).*");
         this.responsePattern = Pattern.compile("^(Response:).*");
+        this.loginPattern = Pattern.compile("^.*(Success).*");
         this.connected = false;
     }
 
-    public Connector(Configuration configuration, boolean listenEvents) throws IOException {
+    public Connector(Configuration configuration, boolean listenEvents) {
         this();
         this.configuration = configuration;
         this.listenEvents = listenEvents;
@@ -53,33 +53,9 @@ public class Connector {
         this.createThread();
     }
 
-    public Connector(Configuration configuration, EventHandler handler, boolean listenEvents) throws IOException {
+    public Connector(Configuration configuration, EventHandler handler, boolean listenEvents) {
         this(configuration, listenEvents);
         this.addEventHandler(handler);
-        this.start();
-    }
-
-    public int getConnectTimeout() {
-        return connectTimeout;
-    }
-
-    public void setConnectTimeout(int connectTimeout) {
-        this.connectTimeout = connectTimeout;
-    }
-
-    public int getReadTimeout() {
-        return readTimeout * 2;
-    }
-
-    public void setReadTimeout(int readTimeout) {
-        if (client != null) {
-            try {
-                client.setSoTimeout(readTimeout);
-            } catch (SocketException ex) {
-                ex.printStackTrace();
-            }
-        }
-        this.readTimeout = readTimeout / 2;
     }
 
     private void createMaintainingThread() {
@@ -110,45 +86,37 @@ public class Connector {
             public void run() {
                 while (!Thread.currentThread().isInterrupted()) {
                     try {
-                        client = new Socket();
-                        client.setSoTimeout(readTimeout * 2);
-                        client.connect(new InetSocketAddress(configuration.getHostName(), configuration.getHostPort()), connectTimeout);
-                        reader = new Reader(client.getInputStream());
-                        writer = new Writer(client.getOutputStream());
-                        connected = true;
-                        Login l = new Login(configuration.getUserName(), configuration.getUserPassword(), listenEvents);
-                        writer.send(l);
-                        String message = reader.readMessage();
-                        if (message.contains("Success")) {
-                            while (!Thread.currentThread().isInterrupted()) {
-                                message = reader.readMessage();
-                                if (eventPattern.matcher(message).find()) {
-                                    processEvent(message);
-                                    continue;
-                                }
-                                if (responsePattern.matcher(message).find()) {
-                                    processResponse(message);
-                                    continue;
-                                }
-                            }
-                        } else {
-                            reader.close();
-                            writer.close();
-                            client.close();
-                            break;
+                        if (!connected) {
+                            connect();
+                        }
+                        while (!Thread.currentThread().isInterrupted()) {
+                            processMessage();
                         }
                     } catch (IOException ex) {
-                        ex.printStackTrace();
+                        connected = false;
                         try {
                             Thread.sleep(1000);
                         } catch (InterruptedException e) {
                             break;
                         }
-                        connected = false;
+                    } catch (NotAuthorizedException e) {
+                        break;
                     }
                 }
             }
         };
+    }
+
+    private void processMessage() throws IOException {
+        String message = reader.readMessage();
+        if (eventPattern.matcher(message).find()) {
+            processEvent(message);
+            return;
+        }
+        if (responsePattern.matcher(message).find()) {
+            processResponse(message);
+            return;
+        }
     }
 
     private void processEvent(String message) {
@@ -174,6 +142,39 @@ public class Connector {
         }
     }
 
+    private void connect() throws IOException, NotAuthorizedException {
+        client = new Socket();
+        client.setSoTimeout(readTimeout * 2);
+        client.connect(new InetSocketAddress(configuration.getHostName(), configuration.getHostPort()), connectTimeout);
+        reader = new Reader(client.getInputStream());
+        writer = new Writer(client.getOutputStream());
+        connected = true;
+        Login l = new Login(configuration.getUserName(), configuration.getUserPassword(), listenEvents);
+        writer.send(l);
+        if (loginPattern.matcher(reader.readMessage()).find()) {
+            throw new NotAuthorizedException("Bad user name or secret.");
+        }
+    }
+
+    public int getConnectTimeout() {
+        return connectTimeout;
+    }
+
+    public void setConnectTimeout(int connectTimeout) {
+        this.connectTimeout = connectTimeout;
+    }
+
+    public int getReadTimeout() {
+        return readTimeout * 2;
+    }
+
+    public void setReadTimeout(int readTimeout) throws IOException {
+        if (client != null) {
+            client.setSoTimeout(readTimeout);
+        }
+        this.readTimeout = readTimeout / 2;
+    }
+
     public void addEventHandler(EventHandler handler) {
         synchronized (mutex) {
             handlers.add(handler);
@@ -186,12 +187,19 @@ public class Connector {
         }
     }
 
-    public void start() {
+    public void start() throws IOException, NotAuthorizedException {
+        this.connect();
         mainThread.start();
+        if (this.configuration.isEnabledMaintainingThread()) {
+            maintainingThread.start();
+        }
     }
 
     public void stop() {
         mainThread.interrupt();
+        if (this.configuration.isEnabledMaintainingThread() && maintainingThread.isAlive()) {
+            maintainingThread.interrupt();
+        }
     }
 
     public void sendAction(Action action) throws IOException {
@@ -208,16 +216,9 @@ public class Connector {
         return connected;
     }
 
-    public void startMaintainingThread() {
-        maintainingThread.start();
-    }
-
-    public void stopMaintainingThread() {
-        maintainingThread.interrupt();
-    }
-
-    public static void main(String[] args) throws IOException, InterruptedException, TimeoutException {
+    public static void main(String[] args) throws IOException, InterruptedException, TimeoutException, NotAuthorizedException {
         final Configuration conf = new Configuration("192.168.24.4", 5038, "admin", "holi!holi9");
+        conf.enableRunMaintainingThread(true);
         final Connector conn = new Connector(conf, new EventHandler() {
             @Override
             public void handleEvent(Event event) {
@@ -229,7 +230,7 @@ public class Connector {
                 //System.out.println(response.getMessage());
             }
         }, true);
-        conn.startMaintainingThread();
+        conn.start();
         SynchronizedActionSender actionSender = new SynchronizedActionSender(conn);
         long star = System.currentTimeMillis();
         Response response = actionSender.send(new Command("sip show peers"));

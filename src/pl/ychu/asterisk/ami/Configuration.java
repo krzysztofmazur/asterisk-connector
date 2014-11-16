@@ -8,6 +8,7 @@ public class Configuration {
     private String userName;
     private String userPassword;
     private int hostPort;
+    private boolean runMaintainingThread = false;
 
     protected Configuration() {
     }
@@ -17,6 +18,14 @@ public class Configuration {
         this.userName = userName;
         this.userPassword = userPassword;
         this.hostPort = hostPort;
+    }
+
+    public boolean isEnabledMaintainingThread() {
+        return runMaintainingThread;
+    }
+
+    public void enableRunMaintainingThread(boolean runMaintainingThread) {
+        this.runMaintainingThread = runMaintainingThread;
     }
 
     public String getHostName() {
