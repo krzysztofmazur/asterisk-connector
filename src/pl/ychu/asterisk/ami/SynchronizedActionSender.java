@@ -7,10 +7,16 @@ import java.util.concurrent.TimeoutException;
  * Created by krzysztof on 15.11.14.
  */
 public class SynchronizedActionSender {
-    private Connector connector;
+    private AsynchronizedConnection connector;
 
-    public SynchronizedActionSender(Connector connector) {
-        this.connector = connector;
+    public SynchronizedActionSender(Connection connection) throws IOException, NotAuthorizedException {
+        this.connector = new AsynchronizedConnection(connection);
+        this.connector.enableMaintainingThread(true);
+        this.connector.start();
+    }
+
+    public void closeConnection() {
+        this.connector.stop();
     }
 
     public Response send(Action action) throws InterruptedException, IOException, TimeoutException {
