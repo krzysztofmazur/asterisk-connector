@@ -52,6 +52,14 @@ public class AsynchronizedConnection {
         writer.send(action);
     }
 
+    public void addHandler(EventHandler handler) {
+        handlers.add(handler);
+    }
+
+    public void removeHandler(EventHandler handler) {
+        handlers.remove(handler);
+    }
+
     public void sendAction(Action action, ResponseHandler handler) throws IOException, NotConnectedException {
         if (!working) {
             throw new NotConnectedException("Not connected to asterisk.");
@@ -103,6 +111,7 @@ public class AsynchronizedConnection {
                         try {
                             Thread.sleep(1000);
                         } catch (InterruptedException ex2) {
+                            break;
                         }
                     } catch (NotAuthorizedException e) {
                         working = false;
