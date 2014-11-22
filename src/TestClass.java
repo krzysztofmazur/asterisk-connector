@@ -1,4 +1,5 @@
 import pl.ychu.asterisk.ami.*;
+import pl.ychu.asterisk.ami.action.AOCMessage;
 import pl.ychu.asterisk.ami.exception.NotAuthorizedException;
 
 import java.io.IOException;
@@ -22,7 +23,8 @@ public class TestClass {
                 System.out.println(response.getMessage());
             }
         });
-        conn.start();
+        //conn.start();
+
         /*
         conn.sendAction(new ListCommands());
         SynchronizedActionSender sender = new SynchronizedActionSender(connection);
