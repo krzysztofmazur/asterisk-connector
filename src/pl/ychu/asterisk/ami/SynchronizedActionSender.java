@@ -1,5 +1,8 @@
 package pl.ychu.asterisk.ami;
 
+import pl.ychu.asterisk.ami.exception.NotAuthorizedException;
+import pl.ychu.asterisk.ami.exception.NotConnectedException;
+
 import java.io.IOException;
 import java.util.concurrent.TimeoutException;
 
@@ -15,15 +18,15 @@ public class SynchronizedActionSender {
         this.connector.start();
     }
 
-    public void closeConnection() {
+    public void closeConnection() throws NotConnectedException {
         this.connector.stop();
     }
 
-    public Response send(Action action) throws InterruptedException, IOException, TimeoutException {
+    public Response send(Action action) throws InterruptedException, IOException, TimeoutException, NotConnectedException {
         return this.send(action, 30000);
     }
 
-    public Response send(Action action, int timeout) throws InterruptedException, TimeoutException, IOException {
+    public Response send(Action action, int timeout) throws InterruptedException, TimeoutException, IOException, NotConnectedException {
         final ActionSyncSenderHelper helper = new ActionSyncSenderHelper();
         connector.sendAction(action, new ResponseHandler() {
             @Override

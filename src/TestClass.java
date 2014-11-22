@@ -1,4 +1,5 @@
 import pl.ychu.asterisk.ami.*;
+import pl.ychu.asterisk.ami.exception.NotAuthorizedException;
 
 import java.io.IOException;
 import java.util.concurrent.TimeoutException;
@@ -8,9 +9,9 @@ import java.util.concurrent.TimeoutException;
  */
 public class TestClass {
     public static void main(String[] args) throws IOException, InterruptedException, TimeoutException, NotAuthorizedException {
-        final Configuration conf = new Configuration("192.168.24.4", 5038, "admin", "holi!holi9");
-        final Connection connection = new Connection(conf);
-        final AsynchronizedConnection conn = new AsynchronizedConnection(connection, new EventHandler() {
+        Configuration conf = new Configuration("192.168.24.4", 5038, "admin", "holi!holi9");
+        Connection connection = new Connection(conf);
+        AsynchronizedConnection conn = new AsynchronizedConnection(connection, new EventHandler() {
             @Override
             public void handleEvent(Event event) {
                 System.out.println(System.currentTimeMillis() + ": " + event.getEventName());

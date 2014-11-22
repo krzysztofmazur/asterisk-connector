@@ -1,4 +1,4 @@
-package pl.ychu.asterisk.ami;
+package pl.ychu.asterisk.ami.exception;
 
 /**
  * Created by krzysztof on 16.11.14.

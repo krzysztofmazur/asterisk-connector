@@ -1,7 +1,7 @@
 package pl.ychu.asterisk.ami;
 
-import org.omg.CORBA.WrongTransaction;
 import pl.ychu.asterisk.ami.action.Login;
+import pl.ychu.asterisk.ami.exception.NotAuthorizedException;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;

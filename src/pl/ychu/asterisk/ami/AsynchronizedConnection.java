@@ -1,6 +1,8 @@
 package pl.ychu.asterisk.ami;
 
 import pl.ychu.asterisk.ami.action.Ping;
+import pl.ychu.asterisk.ami.exception.NotAuthorizedException;
+import pl.ychu.asterisk.ami.exception.NotConnectedException;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -50,7 +52,10 @@ public class AsynchronizedConnection {
         writer.send(action);
     }
 
-    public void sendAction(Action action, ResponseHandler handler) throws IOException {
+    public void sendAction(Action action, ResponseHandler handler) throws IOException, NotConnectedException {
+        if (!working) {
+            throw new NotConnectedException("Not connected to asterisk.");
+        }
         action.setActionId(this.actionIdFactory.getNext());
         waitingForResponse.put(action.getActionId(), handler);
         writer.send(action);
@@ -64,7 +69,10 @@ public class AsynchronizedConnection {
         }
     }
 
-    public void stop() {
+    public void stop() throws NotConnectedException {
+        if (!working) {
+            throw new NotConnectedException("Not connected to asterisk.");
+        }
         mainThread.interrupt();
         if (this.enabledMaintainingThread && maintainingThread.isAlive()) {
             maintainingThread.interrupt();
