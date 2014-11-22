@@ -25,7 +25,6 @@ public class Connection {
     }
 
     public void connect() throws IOException, NotAuthorizedException {
-        Pattern loginPattern = Pattern.compile("^(Response: Success).*");
         client = new Socket();
         client.setSoTimeout(readTimeout * 2);
         client.connect(new InetSocketAddress(configuration.getHostName(), configuration.getHostPort()), connectTimeout);
@@ -33,7 +32,7 @@ public class Connection {
         writer = new Writer(client.getOutputStream());
         Login l = new Login(configuration.getUserName(), configuration.getUserPassword(), configuration.isListeningEvents());
         writer.send(l);
-        if (!reader.readMessage().contains("Success")) {
+        if (reader.readMessage().indexOf("Success") == -1) {
             throw new NotAuthorizedException("Bad user name or secret.");
         }
     }
