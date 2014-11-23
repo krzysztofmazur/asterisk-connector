@@ -148,11 +148,8 @@ public class AsynchronizedConnection {
         String message = reader.readMessage();
         if (eventPattern.matcher(message).find()) {
             processEvent(message);
-            return;
-        }
-        if (responsePattern.matcher(message).find()) {
+        } else if (responsePattern.matcher(message).find()) {
             processResponse(message);
-            return;
         }
     }
 
