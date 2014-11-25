@@ -6,12 +6,12 @@ import java.util.Iterator;
 /**
  * Created by krzysztof on 15.11.14.
  */
-public class CustomAction extends Action {
+public class ActionImpl extends Action {
 
     private String actionName;
     private HashMap<String, String> variables;
 
-    public CustomAction(String actionName) {
+    public ActionImpl(String actionName) {
         this.actionName = actionName;
         variables = new HashMap<String, String>();
     }

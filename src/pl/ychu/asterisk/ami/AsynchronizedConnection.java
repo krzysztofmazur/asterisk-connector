@@ -5,43 +5,35 @@ import pl.ychu.asterisk.ami.exception.NotAuthorizedException;
 import pl.ychu.asterisk.ami.exception.NotConnectedException;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.regex.Pattern;
 
 /**
  * Created by Krzysztof on 2014-11-16.
  */
 public class AsynchronizedConnection {
     private final Connection connection;
-    private final ArrayList<EventHandler> handlers;
     private final Object mutex;
     private final ActionId actionIdFactory;
-    private final HashMap<String, ResponseHandler> waitingForResponse;
-    private final Pattern eventPattern;
-    private final Pattern responsePattern;
     private Thread mainThread;
     private Thread maintainingThread;
     private Writer writer;
     private Reader reader;
     private boolean working;
     private boolean enabledMaintainingThread = true;
+    private final MessageProcessor msgProcessor;
 
-    public AsynchronizedConnection(Connection connection) {
+    public AsynchronizedConnection(Connection connection, MessageProcessor msgProcessor) {
         this.connection = connection;
+        this.msgProcessor = msgProcessor;
         this.mutex = new Object();
-        this.handlers = new ArrayList<EventHandler>();
         this.actionIdFactory = new ActionId();
-        this.waitingForResponse = new HashMap<String, ResponseHandler>();
-        this.eventPattern = Pattern.compile("^(Event:).*");
-        this.responsePattern = Pattern.compile("^(Response:).*");
         this.createThread();
         this.createMaintainingThread();
+
     }
 
-    public AsynchronizedConnection(Connection connection, EventHandler eventHandler) {
-        this(connection);
-        this.handlers.add(eventHandler);
+    public AsynchronizedConnection(Connection connection, MessageProcessor msgProcessor, EventHandler eventHandler) {
+        this(connection, msgProcessor);
+        this.addHandler(eventHandler);
     }
 
     public void enableMaintainingThread(boolean enabled) {
@@ -53,11 +45,11 @@ public class AsynchronizedConnection {
     }
 
     public void addHandler(EventHandler handler) {
-        handlers.add(handler);
+        msgProcessor.addHandler(handler);
     }
 
     public void removeHandler(EventHandler handler) {
-        handlers.remove(handler);
+        msgProcessor.removeHandler(handler);
     }
 
     public void sendAction(Action action, ResponseHandler handler) throws IOException, NotConnectedException {
@@ -65,7 +57,7 @@ public class AsynchronizedConnection {
             throw new NotConnectedException("Not connected to asterisk.");
         }
         action.setActionId(this.actionIdFactory.getNext());
-        waitingForResponse.put(action.getActionId(), handler);
+        msgProcessor.addResponseHandler(action.getActionId(), handler);
         writer.send(action);
     }
 
@@ -92,6 +84,7 @@ public class AsynchronizedConnection {
         working = true;
         writer = connection.getWriter();
         reader = connection.getReader();
+        msgProcessor.setReader(reader);
     }
 
     private void createThread() {
@@ -104,7 +97,7 @@ public class AsynchronizedConnection {
                             reconnect();
                         }
                         while (!Thread.currentThread().isInterrupted()) {
-                            processMessage();
+                            msgProcessor.processMessage();
                         }
                     } catch (IOException ex) {
                         working = false;
@@ -142,83 +135,5 @@ public class AsynchronizedConnection {
                 }
             }
         });
-    }
-
-    private void processMessage() throws IOException {
-        String message = reader.readMessage();
-        if (eventPattern.matcher(message).find()) {
-            processEvent(message);
-        } else if (responsePattern.matcher(message).find()) {
-            processResponse(message);
-        }
-    }
-
-    private void processEvent(String message) {
-        Event e = Event.parseEvent(message);
-        synchronized (mutex) {
-            for (EventHandler handler : handlers) {
-                new Thread(new EventAsyncHelper(e, handler)).start();
-            }
-        }
-    }
-
-    private void processResponse(String message) {
-        Response r = new Response(message);
-        ResponseHandler handler = waitingForResponse.remove(r.getActionId());
-        if (handler != null) {
-            new Thread(new ResponseAsyncHelper(r, handler)).start();
-        } else {
-            synchronized (mutex) {
-                for (EventHandler evHandler : handlers) {
-                    new Thread(new DefaultResponseAsyncHelper(r, evHandler)).start();
-                }
-            }
-        }
-    }
-
-    private class ResponseAsyncHelper implements Runnable {
-
-        private Response response;
-        private ResponseHandler handler;
-
-        public ResponseAsyncHelper(Response response, ResponseHandler handler) {
-            this.response = response;
-            this.handler = handler;
-        }
-
-        @Override
-        public void run() {
-            handler.handleResponse(response);
-        }
-    }
-
-    private class DefaultResponseAsyncHelper implements Runnable {
-        private Response response;
-        private EventHandler handler;
-
-        public DefaultResponseAsyncHelper(Response response, EventHandler handler) {
-            this.response = response;
-            this.handler = handler;
-        }
-
-        @Override
-        public void run() {
-            handler.handleResponse(response);
-        }
-    }
-
-    private class EventAsyncHelper implements Runnable {
-        private Event event;
-        private EventHandler handler;
-
-        public EventAsyncHelper(Event event, EventHandler handler) {
-            this.event = event;
-            this.handler = handler;
-        }
-
-        @Override
-        public void run() {
-            handler.handleEvent(event);
-        }
     }
 }

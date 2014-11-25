@@ -13,7 +13,7 @@ public class SynchronizedActionSender {
     private AsynchronizedConnection connector;
 
     public SynchronizedActionSender(Connection connection) throws IOException, NotAuthorizedException {
-        this.connector = new AsynchronizedConnection(connection);
+        this.connector = new AsynchronizedConnection(connection, new SynchronizedMessageProcessor());
         this.connector.enableMaintainingThread(true);
         this.connector.start();
     }
