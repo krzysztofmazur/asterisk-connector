@@ -12,18 +12,26 @@ public class TestClass {
     public static void main(String[] args) throws IOException, InterruptedException, TimeoutException, NotAuthorizedException, NotConnectedException {
         Configuration conf = new Configuration("192.168.24.4", 5038, "admin", "holi!holi9");
         Connection connection = new Connection(conf);
-        SynchronizedConnection conn = new SynchronizedConnection(connection, new SynchronizedMessageProcessor(), new EventHandler() {
+        AsynchronizedConnection conn = new AsynchronizedConnection(connection, new AsynchronizedMessageProcessor(), new EventHandler() {
             @Override
             public void handleEvent(Event event) {
-                System.out.println(System.currentTimeMillis() + ": " + event.getEventName());
+                //System.out.println(System.currentTimeMillis() + ": " + event.getEventName());
+                UnifiedEvent e = (UnifiedEvent) event;
+                System.out.println(e.getMessage());
             }
 
+            @Override
+            public void handleResponse(Response response) {
+                //System.out.println(response.getMessage());
+            }
+        });
+        conn.start();
+        conn.sendAction(new UnifiedAction("QueueStatus"), new ResponseHandler() {
             @Override
             public void handleResponse(Response response) {
                 System.out.println(response.getMessage());
             }
         });
-        conn.run();
 
 /*
         conn.sendAction(new ListCommands());

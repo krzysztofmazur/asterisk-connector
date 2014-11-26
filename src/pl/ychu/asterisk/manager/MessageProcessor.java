@@ -11,5 +11,7 @@ public interface MessageProcessor {
 
     public void addResponseHandler(String actionId, ResponseHandler responseHandler);
 
+    public void removeResponseHandler(ResponseHandler responseHandler);
+
     public void setReader(Reader reader);
 }

@@ -11,6 +11,7 @@ import java.util.regex.Pattern;
 public class AsynchronizedMessageProcessor implements MessageProcessor {
     private final Pattern eventPattern;
     private final Pattern responsePattern;
+    private final Pattern actionIdPattern;
     private final ArrayList<EventHandler> handlers;
     private final HashMap<String, ResponseHandler> responseHandlers;
     private Reader reader;
@@ -20,17 +21,18 @@ public class AsynchronizedMessageProcessor implements MessageProcessor {
         this.handlers = new ArrayList<EventHandler>();
         this.responseHandlers = new HashMap<String, ResponseHandler>();
         this.eventPattern = Pattern.compile("^(Event:).*");
-        this.responsePattern = Pattern.compile("^(Response:).*");
+        this.responsePattern = Pattern.compile("^.*(Response:).*");
+        this.actionIdPattern = Pattern.compile("^.*(ActionID:).*");
         this.mutex = new Object();
     }
 
     @Override
     public void processMessage() throws IOException {
         String message = reader.readMessage();
-        if (eventPattern.matcher(message).find()) {
-            processEvent(message);
-        } else if (responsePattern.matcher(message).find()) {
+        if (responsePattern.matcher(message).find() || actionIdPattern.matcher(message).find()) {
             processResponse(message);
+        } else if (eventPattern.matcher(message).find()) {
+            processEvent(message);
         }
     }
 
@@ -46,7 +48,7 @@ public class AsynchronizedMessageProcessor implements MessageProcessor {
 
     private void processResponse(String message) {
         Response r = new Response(message);
-        ResponseHandler handler = responseHandlers.remove(r.getActionId());
+        ResponseHandler handler = responseHandlers.get(r.getActionId());
         if (handler != null) {
             new Thread(new ResponseAsyncHelper(r, handler)).start();
         } else {
@@ -71,6 +73,11 @@ public class AsynchronizedMessageProcessor implements MessageProcessor {
     @Override
     public void addResponseHandler(String actionId, ResponseHandler responseHandler) {
         responseHandlers.put(actionId, responseHandler);
+    }
+
+    @Override
+    public void removeResponseHandler(ResponseHandler responseHandler) {
+        responseHandlers.remove(responseHandler);
     }
 
     @Override
