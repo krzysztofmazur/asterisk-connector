@@ -35,7 +35,7 @@ public class SynchronizedMessageProcessor implements MessageProcessor {
     }
 
     private void processEvent(String message) {
-        Event e = Event.parseEvent(message);
+        UnifiedEvent e = UnifiedEvent.parseEvent(message);
         synchronized (mutex) {
             for (EventHandler handler : handlers) {
                 handler.handleEvent(e);

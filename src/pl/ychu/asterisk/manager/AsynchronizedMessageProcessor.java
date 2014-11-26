@@ -36,7 +36,7 @@ public class AsynchronizedMessageProcessor implements MessageProcessor {
 
 
     private void processEvent(String message) {
-        Event e = Event.parseEvent(message);
+        UnifiedEvent e = UnifiedEvent.parseEvent(message);
         synchronized (mutex) {
             for (EventHandler handler : handlers) {
                 new Thread(new EventAsyncHelper(e, handler)).start();
@@ -110,17 +110,17 @@ public class AsynchronizedMessageProcessor implements MessageProcessor {
     }
 
     private class EventAsyncHelper implements Runnable {
-        private Event event;
+        private UnifiedEvent unifiedEvent;
         private EventHandler handler;
 
-        public EventAsyncHelper(Event event, EventHandler handler) {
-            this.event = event;
+        public EventAsyncHelper(UnifiedEvent unifiedEvent, EventHandler handler) {
+            this.unifiedEvent = unifiedEvent;
             this.handler = handler;
         }
 
         @Override
         public void run() {
-            handler.handleEvent(event);
+            handler.handleEvent(unifiedEvent);
         }
     }
 }
