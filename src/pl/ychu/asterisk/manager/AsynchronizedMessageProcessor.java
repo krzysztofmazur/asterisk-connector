@@ -47,7 +47,7 @@ public class AsynchronizedMessageProcessor implements MessageProcessor {
     }
 
     private void processResponse(String message) {
-        Response r = new Response(message);
+        UnifiedResponse r = new UnifiedResponse(message);
         ResponseHandler handler = responseHandlers.get(r.getActionId());
         if (handler != null) {
             new Thread(new ResponseAsyncHelper(r, handler)).start();
@@ -87,32 +87,32 @@ public class AsynchronizedMessageProcessor implements MessageProcessor {
 
     private class ResponseAsyncHelper implements Runnable {
 
-        private Response response;
+        private UnifiedResponse unifiedResponse;
         private ResponseHandler handler;
 
-        public ResponseAsyncHelper(Response response, ResponseHandler handler) {
-            this.response = response;
+        public ResponseAsyncHelper(UnifiedResponse unifiedResponse, ResponseHandler handler) {
+            this.unifiedResponse = unifiedResponse;
             this.handler = handler;
         }
 
         @Override
         public void run() {
-            handler.handleResponse(response);
+            handler.handleResponse(unifiedResponse);
         }
     }
 
     private class DefaultResponseAsyncHelper implements Runnable {
-        private Response response;
+        private UnifiedResponse unifiedResponse;
         private EventHandler handler;
 
-        public DefaultResponseAsyncHelper(Response response, EventHandler handler) {
-            this.response = response;
+        public DefaultResponseAsyncHelper(UnifiedResponse unifiedResponse, EventHandler handler) {
+            this.unifiedResponse = unifiedResponse;
             this.handler = handler;
         }
 
         @Override
         public void run() {
-            handler.handleResponse(response);
+            handler.handleResponse(unifiedResponse);
         }
     }
 

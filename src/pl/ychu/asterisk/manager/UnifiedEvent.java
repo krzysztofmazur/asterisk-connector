@@ -4,11 +4,10 @@ import java.util.HashMap;
 
 public class UnifiedEvent extends Event {
 
-    private final String eventMsg;
     private final HashMap<String, String> map;
 
     protected UnifiedEvent(String event) {
-        this.eventMsg = event;
+        super(event);
         this.map = new HashMap<String, String>();
         for (String line : event.split("\n")) {
             String[] lineS = line.split(":", 2);
@@ -22,9 +21,6 @@ public class UnifiedEvent extends Event {
         }
     }
 
-    public String getMessage() {
-        return eventMsg;
-    }
 
     public String getVariable(String variableName) {
         return map.get(variableName);

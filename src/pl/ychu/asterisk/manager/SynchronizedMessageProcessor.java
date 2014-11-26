@@ -43,7 +43,7 @@ public class SynchronizedMessageProcessor implements MessageProcessor {
     }
 
     private void processResponse(String message) {
-        Response r = new Response(message);
+        UnifiedResponse r = new UnifiedResponse(message);
         ResponseHandler handler = responseHandlers.get(r.getActionId());
         if (handler != null) {
             handler.handleResponse(r);
