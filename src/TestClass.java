@@ -1,8 +1,6 @@
-import pl.ychu.asterisk.ami.*;
-import pl.ychu.asterisk.ami.action.AOCMessage;
-import pl.ychu.asterisk.ami.action.ListCommands;
-import pl.ychu.asterisk.ami.exception.NotAuthorizedException;
-import pl.ychu.asterisk.ami.exception.NotConnectedException;
+import pl.ychu.asterisk.manager.*;
+import pl.ychu.asterisk.manager.exception.NotAuthorizedException;
+import pl.ychu.asterisk.manager.exception.NotConnectedException;
 
 import java.io.IOException;
 import java.util.concurrent.TimeoutException;
