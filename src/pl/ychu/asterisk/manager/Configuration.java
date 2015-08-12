@@ -1,8 +1,5 @@
 package pl.ychu.asterisk.manager;
 
-/**
- * Created by Krzysztof on 2014-11-10.
- */
 public class Configuration {
     private String hostName;
     private String userName;

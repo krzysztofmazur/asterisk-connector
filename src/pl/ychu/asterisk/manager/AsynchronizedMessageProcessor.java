@@ -5,9 +5,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.regex.Pattern;
 
-/**
- * Created by Krzysztof on 2014-11-25.
- */
 public class AsynchronizedMessageProcessor implements MessageProcessor {
     private final Pattern eventPattern;
     private final Pattern responsePattern;
@@ -18,8 +15,8 @@ public class AsynchronizedMessageProcessor implements MessageProcessor {
     private final Object mutex;
 
     public AsynchronizedMessageProcessor() {
-        this.handlers = new ArrayList<EventHandler>();
-        this.responseHandlers = new HashMap<String, ResponseHandler>();
+        this.handlers = new ArrayList<>();
+        this.responseHandlers = new HashMap<>();
         this.eventPattern = Pattern.compile("^(Event:).*");
         this.responsePattern = Pattern.compile("^.*(Response:).*");
         this.actionIdPattern = Pattern.compile("^.*(ActionID:).*");

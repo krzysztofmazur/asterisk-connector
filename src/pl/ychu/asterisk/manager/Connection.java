@@ -26,8 +26,10 @@ public class Connection {
         client = new Socket();
         client.setSoTimeout(readTimeout * 2);
         client.connect(new InetSocketAddress(configuration.getHostName(), configuration.getHostPort()), connectTimeout);
+
         reader = new Reader(client.getInputStream());
         writer = new Writer(client.getOutputStream());
+
         UnifiedAction l = new UnifiedAction("Login");
         l.putVariable("Username", configuration.getUserName());
         l.putVariable("Secret", configuration.getUserPassword());
@@ -35,7 +37,7 @@ public class Connection {
             l.putVariable("Events", "off");
         }
         writer.send(l);
-        if (reader.readMessage().indexOf("Success") == -1) {
+        if (!reader.readMessage().contains("Success")) {
             throw new NotAuthorizedException("Bad user name or secret.");
         }
     }

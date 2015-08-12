@@ -3,9 +3,6 @@ package pl.ychu.asterisk.manager;
 import java.io.IOException;
 import java.io.OutputStream;
 
-/**
- * Created by Krzysztof on 2014-11-11.
- */
 public class Writer {
 
     private OutputStream os;

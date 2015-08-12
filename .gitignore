@@ -1,4 +1,4 @@
-.idea/
-out/
-pl-ychu-asterisk.iml
-java-connector.iml
+/.idea
+/out
+/pl-ychu-asterisk.iml
+/java-connector.iml

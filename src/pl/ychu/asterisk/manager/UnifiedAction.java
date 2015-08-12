@@ -5,9 +5,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
-/**
- * Created by krzysztof on 15.11.14.
- */
 public class UnifiedAction extends Action {
 
     private String actionName;

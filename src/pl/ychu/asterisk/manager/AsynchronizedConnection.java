@@ -5,9 +5,6 @@ import pl.ychu.asterisk.manager.exception.NotConnectedException;
 
 import java.io.IOException;
 
-/**
- * Created by Krzysztof on 2014-11-16.
- */
 public class AsynchronizedConnection {
     private final Connection connection;
     private final Object mutex;

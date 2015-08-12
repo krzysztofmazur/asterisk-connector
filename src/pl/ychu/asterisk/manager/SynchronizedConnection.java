@@ -4,9 +4,6 @@ import pl.ychu.asterisk.manager.exception.NotAuthorizedException;
 
 import java.io.IOException;
 
-/**
- * Created by Krzysztof on 2014-11-16.
- */
 public class SynchronizedConnection {
     private final Connection connection;
     private final Object mutex;

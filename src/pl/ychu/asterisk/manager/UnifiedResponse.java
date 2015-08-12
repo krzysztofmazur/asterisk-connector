@@ -2,9 +2,6 @@ package pl.ychu.asterisk.manager;
 
 import java.util.HashMap;
 
-/**
- * Created by Krzysztof on 2014-11-13.
- */
 public class UnifiedResponse extends Response {
     private HashMap<String, String> vars;
     private String addrInfo;
@@ -13,7 +10,7 @@ public class UnifiedResponse extends Response {
     public UnifiedResponse(String message) {
         super(message);
         StringBuilder sb = new StringBuilder(1000);
-        this.vars = new HashMap<String, String>();
+        this.vars = new HashMap<>();
         for (String line : message.split("\n")) {
             if (line.endsWith("\r") && line.length() != 0) {
                 String[] lineS = line.split(":", 2);

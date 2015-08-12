@@ -6,9 +6,6 @@ import pl.ychu.asterisk.manager.exception.NotConnectedException;
 import java.io.IOException;
 import java.util.concurrent.TimeoutException;
 
-/**
- * Created by krzysztof on 15.11.14.
- */
 public class SynchronizedActionSender {
     private AsynchronizedConnection connector;
 
@@ -28,12 +25,7 @@ public class SynchronizedActionSender {
 
     public Response send(Action action, int timeout) throws InterruptedException, TimeoutException, IOException, NotConnectedException {
         final ActionSyncSenderHelper helper = new ActionSyncSenderHelper();
-        connector.sendAction(action, new ResponseHandler() {
-            @Override
-            public void handleResponse(Response response) {
-                helper.setResponse(response);
-            }
-        });
+        connector.sendAction(action, helper::setResponse);
         long startTime = System.currentTimeMillis() + timeout;
         while (startTime > System.currentTimeMillis()) {
             if (helper.hasResponse()) {
