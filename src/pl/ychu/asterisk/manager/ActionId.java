@@ -10,7 +10,7 @@ public class ActionId {
     public String getNext() {
         synchronized (this) {
             this.actionId++;
-            return System.currentTimeMillis() + String.format("%09d", this.actionId);
+            return String.format("%s%09d", System.currentTimeMillis(), this.actionId);
         }
     }
 }

@@ -8,7 +8,7 @@ public class UnifiedEvent extends Event {
 
     protected UnifiedEvent(String event) {
         super(event);
-        this.map = new HashMap<String, String>();
+        this.map = new HashMap<>();
         for (String line : event.split("\n")) {
             String[] lineS = line.split(":", 2);
             if (lineS[0].contains("Event")) {
