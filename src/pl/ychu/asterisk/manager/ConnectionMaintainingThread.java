@@ -1,5 +1,8 @@
 package pl.ychu.asterisk.manager;
 
+import pl.ychu.asterisk.manager.connection.Connection;
+import pl.ychu.asterisk.manager.connection.Writer;
+
 import java.io.IOException;
 
 public class ConnectionMaintainingThread implements Runnable {
@@ -16,7 +19,7 @@ public class ConnectionMaintainingThread implements Runnable {
     public void run() {
         while (!Thread.currentThread().isInterrupted()) {
             try {
-                Thread.sleep(connection.getReadTimeout() / 2);
+                Thread.sleep(connection.getConnectionConfiguration().getReadTimeout() / 2);
             } catch (InterruptedException ex) {
                 break;
             }

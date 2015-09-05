@@ -1,5 +1,7 @@
 package pl.ychu.asterisk.manager;
 
+import pl.ychu.asterisk.manager.connection.Reader;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;

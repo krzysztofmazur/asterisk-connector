@@ -1,21 +1,20 @@
-package pl.ychu.asterisk.manager;
+package pl.ychu.asterisk.manager.connection;
 
-public class Configuration {
-    private String hostName;
-    private String userName;
-    private String userPassword;
-    private int hostPort;
+public class ConnectionConfiguration {
+
+    private String hostName = "127.0.0.1";
+
+    private String userName = "admin";
+
+    private String userPassword = "secret";
+
+    private int hostPort = 5038;
+
     private boolean listeningEvents = true;
 
-    protected Configuration() {
-    }
+    private int readTimeout = 30000;
 
-    public Configuration(String hostName, int hostPort, String userName, String userPassword) {
-        this.hostName = hostName;
-        this.userName = userName;
-        this.userPassword = userPassword;
-        this.hostPort = hostPort;
-    }
+    private int connectTimeout = 5000;
 
     public String getHostName() {
         return hostName;
@@ -57,13 +56,19 @@ public class Configuration {
         return listeningEvents;
     }
 
-    @Override
-    public String toString() {
-        return "Configuration{" +
-                "hostName='" + hostName + '\'' +
-                ", userName='" + userName + '\'' +
-                ", userPassword='" + userPassword + '\'' +
-                ", hostPort=" + hostPort +
-                '}';
+    public int getReadTimeout() {
+        return readTimeout;
+    }
+
+    public void setReadTimeout(int readTimeout) {
+        this.readTimeout = readTimeout;
+    }
+
+    public int getConnectTimeout() {
+        return connectTimeout;
+    }
+
+    public void setConnectTimeout(int connectTimeout) {
+        this.connectTimeout = connectTimeout;
     }
 }

@@ -1,39 +1,38 @@
-package pl.ychu.asterisk.manager;
+package pl.ychu.asterisk.manager.connection;
 
+import pl.ychu.asterisk.manager.UnifiedAction;
 import pl.ychu.asterisk.manager.exception.NotAuthorizedException;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 
-/**
- * Created by Krzysztof on 2014-11-16.
- */
 public class Connection {
     private Socket client;
-    private Configuration configuration;
+    private ConnectionConfiguration connectionConfiguration;
     private boolean connected = false;
     private Reader reader;
     private Writer writer;
-    private int readTimeout = 30000;
-    private int connectTimeout = 5000;
 
-    public Connection(Configuration configuration) {
-        this.configuration = configuration;
+    public Connection(ConnectionConfiguration connectionConfiguration) {
+        this.connectionConfiguration = connectionConfiguration;
     }
 
     public void connect() throws IOException, NotAuthorizedException {
         client = new Socket();
-        client.setSoTimeout(readTimeout * 2);
-        client.connect(new InetSocketAddress(configuration.getHostName(), configuration.getHostPort()), connectTimeout);
+        client.setSoTimeout(connectionConfiguration.getReadTimeout() * 2);
+        client.connect(new InetSocketAddress(
+                connectionConfiguration.getHostName(),
+                connectionConfiguration.getHostPort()
+        ), connectionConfiguration.getConnectTimeout());
 
         reader = new Reader(client.getInputStream());
         writer = new Writer(client.getOutputStream());
 
         UnifiedAction l = new UnifiedAction("Login");
-        l.putVariable("Username", configuration.getUserName());
-        l.putVariable("Secret", configuration.getUserPassword());
-        if (!configuration.isListeningEvents()) {
+        l.putVariable("Username", connectionConfiguration.getUserName());
+        l.putVariable("Secret", connectionConfiguration.getUserPassword());
+        if (!connectionConfiguration.isListeningEvents()) {
             l.putVariable("Events", "off");
         }
         writer.send(l);
@@ -60,23 +59,7 @@ public class Connection {
         return writer;
     }
 
-    public int getReadTimeout() {
-        return readTimeout;
-    }
-
-    public void setReadTimeout(int readTimeout) {
-        this.readTimeout = readTimeout;
-    }
-
-    public int getConnectTimeout() {
-        return connectTimeout;
-    }
-
-    public void setConnectTimeout(int connectTimeout) {
-        this.connectTimeout = connectTimeout;
-    }
-
-    public Configuration getConfiguration() {
-        return this.configuration;
+    public ConnectionConfiguration getConnectionConfiguration() {
+        return this.connectionConfiguration;
     }
 }
