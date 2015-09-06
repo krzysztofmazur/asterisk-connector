@@ -1,6 +1,9 @@
 package pl.ychu.asterisk.manager;
 
 import pl.ychu.asterisk.manager.connection.Reader;
+import pl.ychu.asterisk.manager.event.Event;
+import pl.ychu.asterisk.manager.event.EventParser;
+import pl.ychu.asterisk.manager.event.EventParserImpl;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -37,7 +40,7 @@ public class MessageProcessorImpl implements MessageProcessor {
 
 
     private void processEvent(String message) {
-        Event e = new Event(message);
+        Event e = (new EventParserImpl()).parse(message);
         synchronized (mutex) {
             for (EventHandler handler : handlers) {
                 new Thread(new EventAsyncHelper(e, handler)).start();

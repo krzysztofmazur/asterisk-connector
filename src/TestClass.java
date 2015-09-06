@@ -2,6 +2,7 @@ import pl.ychu.asterisk.manager.*;
 import pl.ychu.asterisk.manager.connection.Connection;
 import pl.ychu.asterisk.manager.connection.ConnectionConfiguration;
 import pl.ychu.asterisk.manager.connection.ConnectionFacade;
+import pl.ychu.asterisk.manager.event.Event;
 import pl.ychu.asterisk.manager.exception.NotAuthorizedException;
 import pl.ychu.asterisk.manager.exception.NotConnectedException;
 
@@ -17,7 +18,7 @@ public class TestClass {
         conn.addHandler(new EventHandler() {
             @Override
             public void handleEvent(Event event) {
-                System.out.println(event.getMessage());
+                System.out.println(event.getEventName());
             }
 
             @Override
