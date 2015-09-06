@@ -1,5 +1,6 @@
-package pl.ychu.asterisk.manager;
+package pl.ychu.asterisk.manager.connection;
 
+import pl.ychu.asterisk.manager.*;
 import pl.ychu.asterisk.manager.connection.Connection;
 import pl.ychu.asterisk.manager.connection.Writer;
 import pl.ychu.asterisk.manager.exception.NotAuthorizedException;
@@ -7,7 +8,7 @@ import pl.ychu.asterisk.manager.exception.NotConnectedException;
 
 import java.io.IOException;
 
-public class AsyncConnector {
+public class ConnectionFacade {
     private final Connection connection;
     private final ActionIdGenerator actionIdFactory;
     private Thread mainThread;
@@ -15,15 +16,18 @@ public class AsyncConnector {
     private Writer writer;
     private boolean working;
     private boolean enablePingThread = true;
-    private final MessageProcessor msgProcessor;
+    private MessageProcessor msgProcessor;
 
-    public AsyncConnector(Connection connection, MessageProcessor msgProcessor) {
+    public ConnectionFacade(Connection connection) {
         this.connection = connection;
-        this.msgProcessor = msgProcessor;
         this.actionIdFactory = new ActionIdGenerator();
         this.createThread();
         this.createPingThread();
 
+    }
+
+    public void setMessageProcessor(MessageProcessor messageProcessor) {
+        this.msgProcessor = messageProcessor;
     }
 
     public void enablePingThread(boolean enabled) {
