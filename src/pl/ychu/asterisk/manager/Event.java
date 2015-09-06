@@ -11,7 +11,12 @@ public class Event {
     protected Event(String event) {
         this.eventMsg = event;
         this.map = new HashMap<>();
-        for (String line : event.split("\n")) {
+        this.parse();
+    }
+
+    public void parse()
+    {
+        for (String line : this.eventMsg.split("\n")) {
             String[] lineS = line.split(":", 2);
             if (lineS[0].contains("Event")) {
                 this.setEventName(lineS[1].trim());
@@ -22,7 +27,6 @@ public class Event {
             map.put(lineS[0].trim(), lineS[1].trim());
         }
     }
-
 
     public String getVariable(String variableName) {
         return map.get(variableName);

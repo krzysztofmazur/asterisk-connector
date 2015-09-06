@@ -9,6 +9,11 @@ public class Response {
 
     public Response(String message) {
         this.message = message;
+        this.parse();
+    }
+
+    protected void parse()
+    {
         StringBuilder sb = new StringBuilder(1000);
         this.vars = new HashMap<>();
         for (String line : message.split("\n")) {

@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.regex.Pattern;
 
-public class AsynchronizedMessageProcessor implements MessageProcessor {
+public class MessageProcessorImpl implements MessageProcessor {
     private final Pattern eventPattern;
     private final Pattern responsePattern;
     private final Pattern actionIdPattern;
@@ -16,7 +16,7 @@ public class AsynchronizedMessageProcessor implements MessageProcessor {
     private Reader reader;
     private final Object mutex;
 
-    public AsynchronizedMessageProcessor() {
+    public MessageProcessorImpl() {
         this.handlers = new ArrayList<>();
         this.responseHandlers = new HashMap<>();
         this.eventPattern = Pattern.compile("^(Event:).*");

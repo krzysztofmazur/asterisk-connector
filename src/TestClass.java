@@ -10,7 +10,7 @@ import java.util.concurrent.TimeoutException;
 public class TestClass {
     public static void main(String[] args) throws IOException, InterruptedException, TimeoutException, NotAuthorizedException, NotConnectedException {
         Connection connection = new Connection(new ConnectionConfiguration());
-        AsynchronizedConnection conn = new AsynchronizedConnection(connection, new AsynchronizedMessageProcessor(), new EventHandler() {
+        AsynchronizedConnection conn = new AsynchronizedConnection(connection, new MessageProcessorImpl(), new EventHandler() {
             @Override
             public void handleEvent(Event event) {
                 //System.out.println(System.currentTimeMillis() + ": " + event.getEventName());
