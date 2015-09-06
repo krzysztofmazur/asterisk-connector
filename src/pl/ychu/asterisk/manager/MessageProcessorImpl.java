@@ -2,12 +2,11 @@ package pl.ychu.asterisk.manager;
 
 import pl.ychu.asterisk.manager.connection.Reader;
 import pl.ychu.asterisk.manager.event.Event;
-import pl.ychu.asterisk.manager.event.EventParser;
-import pl.ychu.asterisk.manager.event.EventParserImpl;
+import pl.ychu.asterisk.manager.event.EventProcessor;
+import pl.ychu.asterisk.manager.event.StandardEventParser;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.*;
 import java.util.regex.Pattern;
 
 public class MessageProcessorImpl implements MessageProcessor {
@@ -19,6 +18,9 @@ public class MessageProcessorImpl implements MessageProcessor {
     private Reader reader;
     private final Object mutex;
 
+    private EventProcessorRepository eventProcessorRepository;
+    private ResponseHandler defaultResponseHandler;
+
     public MessageProcessorImpl() {
         this.handlers = new ArrayList<>();
         this.responseHandlers = new HashMap<>();
@@ -26,6 +28,16 @@ public class MessageProcessorImpl implements MessageProcessor {
         this.responsePattern = Pattern.compile("^.*(Response:).*");
         this.actionIdPattern = Pattern.compile("^.*(ActionID:).*");
         this.mutex = new Object();
+
+        eventProcessorRepository = new EventProcessorRepository();
+    }
+
+    public void addEventProcessor(EventProcessor eventProcessor) {
+        eventProcessorRepository.addEventProcessor(eventProcessor);
+    }
+
+    public void setDefaultResponseHandler(ResponseHandler defaultResponseHandler) {
+        this.defaultResponseHandler = defaultResponseHandler;
     }
 
     @Override
@@ -40,10 +52,10 @@ public class MessageProcessorImpl implements MessageProcessor {
 
 
     private void processEvent(String message) {
-        Event e = (new EventParserImpl()).parse(message);
         synchronized (mutex) {
-            for (EventHandler handler : handlers) {
-                new Thread(new EventAsyncHelper(e, handler)).start();
+            for (EventProcessor eventProcessor : eventProcessorRepository.getMatchedProcessors(message)) {
+                Object event = eventProcessor.getParser().parse(message);
+                eventProcessor.getHandler().handle(event);
             }
         }
     }
@@ -53,12 +65,8 @@ public class MessageProcessorImpl implements MessageProcessor {
         ResponseHandler handler = responseHandlers.get(r.getActionId());
         if (handler != null) {
             new Thread(new ResponseAsyncHelper(r, handler)).start();
-        } else {
-            synchronized (mutex) {
-                for (EventHandler evHandler : handlers) {
-                    new Thread(new DefaultResponseAsyncHelper(r, evHandler)).start();
-                }
-            }
+        } else if (defaultResponseHandler != null) {
+            new Thread(new ResponseAsyncHelper(r, defaultResponseHandler)).start();
         }
     }
 
@@ -130,6 +138,28 @@ public class MessageProcessorImpl implements MessageProcessor {
         @Override
         public void run() {
             handler.handleEvent(event);
+        }
+    }
+
+    private class EventProcessorRepository {
+        private List<EventProcessor> list;
+
+        public EventProcessorRepository() {
+            list = new LinkedList<>();
+        }
+
+        public List<EventProcessor> getMatchedProcessors(String message) {
+            List<EventProcessor> result = new ArrayList<>();
+            for (EventProcessor processor : list) {
+                if (processor.getParser().getPattern().matcher(message).find()) {
+                    result.add(processor);
+                }
+            }
+            return result;
+        }
+
+        public void addEventProcessor(EventProcessor eventProcessor) {
+            list.add(eventProcessor);
         }
     }
 }

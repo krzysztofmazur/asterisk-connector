@@ -1,5 +1,9 @@
 package pl.ychu.asterisk.manager.event;
 
-public interface EventParser {
-    Event parse(String message);
+import java.util.regex.Pattern;
+
+public interface EventParser<T> {
+    Pattern getPattern();
+
+    T parse(String message);
 }

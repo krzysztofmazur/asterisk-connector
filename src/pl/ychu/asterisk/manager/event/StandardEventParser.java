@@ -1,6 +1,19 @@
 package pl.ychu.asterisk.manager.event;
 
-public class EventParserImpl implements  EventParser{
+import java.util.regex.Pattern;
+
+public class StandardEventParser implements EventParser<Event> {
+
+    private Pattern pattern;
+
+    @Override
+    public synchronized Pattern getPattern() {
+        if (pattern == null) {
+            pattern = Pattern.compile("^.*");
+        }
+        return pattern;
+    }
+
     @Override
     public Event parse(String message) {
         Event event = new Event();
