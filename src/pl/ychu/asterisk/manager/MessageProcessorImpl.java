@@ -13,7 +13,6 @@ public class MessageProcessorImpl implements MessageProcessor {
     private final Pattern eventPattern;
     private final Pattern responsePattern;
     private final Pattern actionIdPattern;
-    private final ArrayList<EventHandler> handlers;
     private final HashMap<String, ResponseHandler> responseHandlers;
     private Reader reader;
     private final Object mutex;
@@ -22,7 +21,6 @@ public class MessageProcessorImpl implements MessageProcessor {
     private ResponseHandler defaultResponseHandler;
 
     public MessageProcessorImpl() {
-        this.handlers = new ArrayList<>();
         this.responseHandlers = new HashMap<>();
         this.eventPattern = Pattern.compile("^(Event:).*");
         this.responsePattern = Pattern.compile("^.*(Response:).*");
@@ -71,16 +69,6 @@ public class MessageProcessorImpl implements MessageProcessor {
     }
 
     @Override
-    public void addHandler(EventHandler handler) {
-        handlers.add(handler);
-    }
-
-    @Override
-    public void removeHandler(EventHandler handler) {
-        handlers.remove(handler);
-    }
-
-    @Override
     public void addResponseHandler(String actionId, ResponseHandler responseHandler) {
         responseHandlers.put(actionId, responseHandler);
     }
@@ -108,36 +96,6 @@ public class MessageProcessorImpl implements MessageProcessor {
         @Override
         public void run() {
             handler.handleResponse(response);
-        }
-    }
-
-    private class DefaultResponseAsyncHelper implements Runnable {
-        private Response response;
-        private EventHandler handler;
-
-        public DefaultResponseAsyncHelper(Response response, EventHandler handler) {
-            this.response = response;
-            this.handler = handler;
-        }
-
-        @Override
-        public void run() {
-            handler.handleResponse(response);
-        }
-    }
-
-    private class EventAsyncHelper implements Runnable {
-        private Event event;
-        private EventHandler handler;
-
-        public EventAsyncHelper(Event event, EventHandler handler) {
-            this.event = event;
-            this.handler = handler;
-        }
-
-        @Override
-        public void run() {
-            handler.handleEvent(event);
         }
     }
 

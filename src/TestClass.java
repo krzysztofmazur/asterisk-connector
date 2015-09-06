@@ -1,5 +1,4 @@
 import pl.ychu.asterisk.manager.*;
-import pl.ychu.asterisk.manager.EventHandler;
 import pl.ychu.asterisk.manager.connection.Connection;
 import pl.ychu.asterisk.manager.connection.ConnectionConfiguration;
 import pl.ychu.asterisk.manager.connection.ConnectionFacade;

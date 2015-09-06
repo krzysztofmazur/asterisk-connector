@@ -40,14 +40,6 @@ public class ConnectionFacade {
         writer.send(action);
     }
 
-    public void addHandler(EventHandler handler) {
-        msgProcessor.addHandler(handler);
-    }
-
-    public void removeHandler(EventHandler handler) {
-        msgProcessor.removeHandler(handler);
-    }
-
     public void sendAction(Action action, ResponseHandler handler) throws IOException, NotConnectedException {
         if (!working) {
             throw new NotConnectedException("Not connected to asterisk.");
