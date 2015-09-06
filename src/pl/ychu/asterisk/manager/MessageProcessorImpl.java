@@ -1,9 +1,7 @@
 package pl.ychu.asterisk.manager;
 
 import pl.ychu.asterisk.manager.connection.Reader;
-import pl.ychu.asterisk.manager.event.Event;
 import pl.ychu.asterisk.manager.event.EventProcessor;
-import pl.ychu.asterisk.manager.event.StandardEventParser;
 
 import java.io.IOException;
 import java.util.*;
@@ -97,15 +95,15 @@ public class MessageProcessorImpl implements MessageProcessor {
     }
 
     private class EventProcessorRepository {
-        private List<EventProcessor> list;
+        private List<EventProcessor> eventProcessorList;
 
         public EventProcessorRepository() {
-            list = new LinkedList<>();
+            eventProcessorList = new LinkedList<>();
         }
 
         public List<EventProcessor> getMatchedProcessors(String message) {
             List<EventProcessor> result = new ArrayList<>();
-            for (EventProcessor processor : list) {
+            for (EventProcessor processor : eventProcessorList) {
                 if (processor.getPattern().matcher(message).find()) {
                     result.add(processor);
                 }
@@ -114,7 +112,7 @@ public class MessageProcessorImpl implements MessageProcessor {
         }
 
         public void addEventProcessor(EventProcessor eventProcessor) {
-            list.add(eventProcessor);
+            eventProcessorList.add(eventProcessor);
         }
     }
 }

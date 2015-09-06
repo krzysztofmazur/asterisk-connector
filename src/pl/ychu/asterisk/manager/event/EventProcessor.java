@@ -32,7 +32,7 @@ public class EventProcessor<T> {
     }
 
     public void processMessage(String message) {
-        T event = parser.parse(message);
-        handler.handle(event);
+        T event = this.getParser().parse(message);
+        this.getHandler().handle(event);
     }
 }
