@@ -1,5 +1,7 @@
 package pl.ychu.asterisk.manager;
 
+import pl.ychu.asterisk.manager.action.ResponseHandler;
+
 import java.io.IOException;
 
 public interface MessageProcessor {

@@ -1,6 +1,7 @@
 package pl.ychu.asterisk.manager;
 
-import pl.ychu.asterisk.manager.connection.Reader;
+import pl.ychu.asterisk.manager.action.Response;
+import pl.ychu.asterisk.manager.action.ResponseHandler;
 import pl.ychu.asterisk.manager.event.EventProcessor;
 
 import java.io.IOException;

@@ -4,6 +4,7 @@ import pl.ychu.asterisk.manager.*;
 import pl.ychu.asterisk.manager.action.AbstractAction;
 import pl.ychu.asterisk.manager.action.Action;
 import pl.ychu.asterisk.manager.action.ActionIdGenerator;
+import pl.ychu.asterisk.manager.action.ResponseHandler;
 import pl.ychu.asterisk.manager.exception.NotAuthorizedException;
 import pl.ychu.asterisk.manager.exception.NotConnectedException;
 
