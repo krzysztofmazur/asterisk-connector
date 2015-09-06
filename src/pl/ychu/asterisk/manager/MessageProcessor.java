@@ -1,17 +1,19 @@
 package pl.ychu.asterisk.manager;
 
+import pl.ychu.asterisk.manager.connection.Reader;
+
 import java.io.IOException;
 
 public interface MessageProcessor {
-    public void processMessage() throws IOException;
+    void processMessage() throws IOException;
 
-    public void addHandler(EventHandler handler);
+    void addHandler(EventHandler handler);
 
-    public void removeHandler(EventHandler handler);
+    void removeHandler(EventHandler handler);
 
-    public void addResponseHandler(String actionId, ResponseHandler responseHandler);
+    void addResponseHandler(String actionId, ResponseHandler responseHandler);
 
-    public void removeResponseHandler(ResponseHandler responseHandler);
+    void removeResponseHandler(ResponseHandler responseHandler);
 
-    public void setReader(Reader reader);
+    void setReader(Reader reader);
 }

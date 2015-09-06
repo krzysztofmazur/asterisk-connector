@@ -1,4 +1,6 @@
-package pl.ychu.asterisk.manager;
+package pl.ychu.asterisk.manager.connection;
+
+import pl.ychu.asterisk.manager.Action;
 
 import java.io.IOException;
 import java.io.OutputStream;

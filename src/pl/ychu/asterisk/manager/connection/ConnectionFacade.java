@@ -1,39 +1,37 @@
-package pl.ychu.asterisk.manager;
+package pl.ychu.asterisk.manager.connection;
 
+import pl.ychu.asterisk.manager.*;
+import pl.ychu.asterisk.manager.connection.Connection;
+import pl.ychu.asterisk.manager.connection.Writer;
 import pl.ychu.asterisk.manager.exception.NotAuthorizedException;
 import pl.ychu.asterisk.manager.exception.NotConnectedException;
 
 import java.io.IOException;
 
-public class AsynchronizedConnection {
+public class ConnectionFacade {
     private final Connection connection;
-    private final Object mutex;
-    private final ActionId actionIdFactory;
+    private final ActionIdGenerator actionIdFactory;
     private Thread mainThread;
-    private Thread maintainingThread;
+    private Thread pingThread;
     private Writer writer;
-    private Reader reader;
     private boolean working;
-    private boolean enabledMaintainingThread = true;
-    private final MessageProcessor msgProcessor;
+    private boolean enablePingThread = true;
+    private MessageProcessor msgProcessor;
 
-    public AsynchronizedConnection(Connection connection, MessageProcessor msgProcessor) {
+    public ConnectionFacade(Connection connection) {
         this.connection = connection;
-        this.msgProcessor = msgProcessor;
-        this.mutex = new Object();
-        this.actionIdFactory = new ActionId();
+        this.actionIdFactory = new ActionIdGenerator();
         this.createThread();
-        this.createMaintainingThread();
+        this.createPingThread();
 
     }
 
-    public AsynchronizedConnection(Connection connection, MessageProcessor msgProcessor, EventHandler eventHandler) {
-        this(connection, msgProcessor);
-        this.addHandler(eventHandler);
+    public void setMessageProcessor(MessageProcessor messageProcessor) {
+        this.msgProcessor = messageProcessor;
     }
 
-    public void enableMaintainingThread(boolean enabled) {
-        this.enabledMaintainingThread = enabled;
+    public void enablePingThread(boolean enabled) {
+        this.enablePingThread = enabled;
     }
 
     public void sendAction(Action action) throws IOException {
@@ -60,8 +58,8 @@ public class AsynchronizedConnection {
     public void start() throws IOException, NotAuthorizedException {
         reconnect();
         mainThread.start();
-        if (this.enabledMaintainingThread) {
-            maintainingThread.start();
+        if (this.enablePingThread) {
+            pingThread.start();
         }
     }
 
@@ -70,8 +68,8 @@ public class AsynchronizedConnection {
             throw new NotConnectedException("Not connected to asterisk.");
         }
         mainThread.interrupt();
-        if (this.enabledMaintainingThread && maintainingThread.isAlive()) {
-            maintainingThread.interrupt();
+        if (this.enablePingThread && pingThread.isAlive()) {
+            pingThread.interrupt();
         }
     }
 
@@ -79,8 +77,7 @@ public class AsynchronizedConnection {
         connection.connect();
         working = true;
         writer = connection.getWriter();
-        reader = connection.getReader();
-        msgProcessor.setReader(reader);
+        msgProcessor.setReader(connection.getReader());
     }
 
     private void createThread() {
@@ -111,7 +108,7 @@ public class AsynchronizedConnection {
         };
     }
 
-    private void createMaintainingThread() {
-        maintainingThread = new Thread(new ConnectionMaintainingThread(connection));
+    private void createPingThread() {
+        pingThread = new Thread(new PingThread(connection));
     }
 }

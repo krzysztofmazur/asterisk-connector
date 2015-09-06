@@ -1,9 +1,9 @@
 package pl.ychu.asterisk.manager;
 
-public class ActionId {
+public class ActionIdGenerator {
     private long actionId;
 
-    public ActionId() {
+    public ActionIdGenerator() {
         actionId = 0;
     }
 

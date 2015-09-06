@@ -1,4 +1,4 @@
-package pl.ychu.asterisk.manager;
+package pl.ychu.asterisk.manager.connection;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -6,7 +6,6 @@ import java.io.InputStream;
 public class Reader {
 
     private InputStream is;
-    private StringBuilder sb;
 
     protected Reader() {
     }
@@ -16,7 +15,7 @@ public class Reader {
     }
 
     public String readMessage() throws IOException {
-        sb = new StringBuilder(200);
+        StringBuilder sb = new StringBuilder(200);
         char last;
         while (true) {
             last = (char) is.read();

@@ -1,13 +1,16 @@
 package pl.ychu.asterisk.manager;
 
+import pl.ychu.asterisk.manager.connection.Connection;
+import pl.ychu.asterisk.manager.connection.Writer;
+
 import java.io.IOException;
 
-public class ConnectionMaintainingThread implements Runnable {
+public class PingThread implements Runnable {
 
     private Writer writer;
     private Connection connection;
 
-    public ConnectionMaintainingThread(Connection connection) {
+    public PingThread(Connection connection) {
         this.connection = connection;
         this.writer = connection.getWriter();
     }
@@ -16,15 +19,15 @@ public class ConnectionMaintainingThread implements Runnable {
     public void run() {
         while (!Thread.currentThread().isInterrupted()) {
             try {
-                Thread.sleep(connection.getReadTimeout() / 2);
+                Thread.sleep(connection.getConnectionConfiguration().getReadTimeout() / 2);
             } catch (InterruptedException ex) {
                 break;
             }
             try {
                 if (writer != null && connection.isConnected()) {
-                    writer.send(new UnifiedAction("Ping"));
+                    writer.send(new Action("Ping"));
                 }
-            } catch (IOException ex) {
+            } catch (IOException ignored) {
             }
         }
     }
