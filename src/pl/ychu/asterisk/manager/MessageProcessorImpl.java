@@ -12,7 +12,6 @@ public class MessageProcessorImpl implements MessageProcessor {
     private final Pattern responsePattern;
     private final Pattern actionIdPattern;
     private final HashMap<String, ResponseHandler> responseHandlers;
-    private Reader reader;
 
     private EventProcessorRepository eventProcessorRepository;
     private ResponseHandler defaultResponseHandler;
@@ -68,11 +67,6 @@ public class MessageProcessorImpl implements MessageProcessor {
     @Override
     public void removeResponseHandler(ResponseHandler responseHandler) {
         responseHandlers.remove(responseHandler);
-    }
-
-    @Override
-    public void setReader(Reader reader) {
-        this.reader = reader;
     }
 
     private class ResponseAsyncHelper implements Runnable {

@@ -79,7 +79,6 @@ public class ConnectionFacade {
         if (!connection.getReader().readMessage().contains("Success")) {
             throw new NotAuthorizedException("Bad user name or secret.");
         }
-        msgProcessor.setReader(connection.getReader());
     }
 
     private void createThread() {
