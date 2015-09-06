@@ -50,11 +50,8 @@ public class MessageProcessorImpl implements MessageProcessor {
 
 
     private void processEvent(String message) {
-        synchronized (mutex) {
-            for (EventProcessor eventProcessor : eventProcessorRepository.getMatchedProcessors(message)) {
-                Object event = eventProcessor.getParser().parse(message);
-                eventProcessor.getHandler().handle(event);
-            }
+        for (EventProcessor eventProcessor : eventProcessorRepository.getMatchedProcessors(message)) {
+            eventProcessor.processMessage(message);
         }
     }
 

@@ -19,4 +19,10 @@ public class EventProcessor<T> {
     public EventParser<T> getParser() {
         return parser;
     }
+
+    public void processMessage(String message)
+    {
+        T event = parser.parse(message);
+        handler.handle(event);
+    }
 }
