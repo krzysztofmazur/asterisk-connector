@@ -16,13 +16,11 @@ public class Writer {
         this.os = os;
     }
 
-    public void send(Action action) throws IOException {
-        synchronized (this) {
-            os.write(action.getBytes());
-        }
+    public synchronized void send(Action action) throws IOException {
+        os.write(action.getBytes());
     }
 
-    public void close() throws IOException {
+    public synchronized void close() throws IOException {
         os.close();
     }
 }
