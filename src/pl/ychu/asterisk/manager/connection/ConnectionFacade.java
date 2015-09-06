@@ -1,8 +1,9 @@
 package pl.ychu.asterisk.manager.connection;
 
 import pl.ychu.asterisk.manager.*;
-import pl.ychu.asterisk.manager.connection.Connection;
-import pl.ychu.asterisk.manager.connection.Writer;
+import pl.ychu.asterisk.manager.action.AbstractAction;
+import pl.ychu.asterisk.manager.action.Action;
+import pl.ychu.asterisk.manager.action.ActionIdGenerator;
 import pl.ychu.asterisk.manager.exception.NotAuthorizedException;
 import pl.ychu.asterisk.manager.exception.NotConnectedException;
 
@@ -36,11 +37,11 @@ public class ConnectionFacade {
         this.enablePingThread = enabled;
     }
 
-    public void sendAction(Action action) throws IOException {
+    public void sendAction(AbstractAction action) throws IOException {
         writer.send(action);
     }
 
-    public void sendAction(Action action, ResponseHandler handler) throws IOException, NotConnectedException {
+    public void sendAction(AbstractAction action, ResponseHandler handler) throws IOException, NotConnectedException {
         if (!working) {
             throw new NotConnectedException("Not connected to asterisk.");
         }

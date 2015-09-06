@@ -1,4 +1,4 @@
-package pl.ychu.asterisk.manager;
+package pl.ychu.asterisk.manager.action;
 
 public class ActionIdGenerator {
     private long actionId;

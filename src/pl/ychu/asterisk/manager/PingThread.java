@@ -1,8 +1,8 @@
 package pl.ychu.asterisk.manager;
 
+import pl.ychu.asterisk.manager.action.Action;
 import pl.ychu.asterisk.manager.connection.Connection;
 import pl.ychu.asterisk.manager.connection.ConnectionConfiguration;
-import pl.ychu.asterisk.manager.connection.Writer;
 
 import java.io.IOException;
 
