@@ -26,5 +26,31 @@ public class TestClass {
         conn.setMessageProcessor(messageProcessor);
         conn.start();
         conn.sendAction(new Action("QueueStatus"), response -> System.out.println(response.getMessage()));
+        (new Thread(new PingThread(conn))).start();
+    }
+
+    private static class PingThread implements Runnable {
+
+        private ConnectionFacade connectionFacade;
+
+        public PingThread(ConnectionFacade connectionFacade) {
+            this.connectionFacade = connectionFacade;
+        }
+
+        @Override
+        public void run() {
+            while (!Thread.currentThread().isInterrupted()) {
+                try {
+                    Thread.sleep(15000);
+                } catch (InterruptedException e) {
+                    break;
+                }
+                try {
+                    connectionFacade.sendAction(new Action("Ping"));
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
     }
 }

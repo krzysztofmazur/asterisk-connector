@@ -15,10 +15,8 @@ public class ConnectionFacade {
     private final ActionIdGenerator actionIdFactory;
     private ConnectionConfiguration connectionConfiguration;
     private Thread mainThread;
-    private Thread pingThread;
     private Writer writer;
     private boolean working;
-    private boolean enablePingThread = true;
     private MessageProcessor msgProcessor;
 
     public ConnectionFacade(Connection connection, ConnectionConfiguration connectionConfiguration) {
@@ -26,16 +24,11 @@ public class ConnectionFacade {
         this.connectionConfiguration = connectionConfiguration;
         this.actionIdFactory = new ActionIdGenerator();
         this.createThread();
-        this.createPingThread();
 
     }
 
     public void setMessageProcessor(MessageProcessor messageProcessor) {
         this.msgProcessor = messageProcessor;
-    }
-
-    public void enablePingThread(boolean enabled) {
-        this.enablePingThread = enabled;
     }
 
     public void sendAction(AbstractAction action) throws IOException {
@@ -54,9 +47,6 @@ public class ConnectionFacade {
     public void start() throws IOException, NotAuthorizedException {
         reconnect();
         mainThread.start();
-        if (this.enablePingThread) {
-            pingThread.start();
-        }
     }
 
     public void stop() throws NotConnectedException {
@@ -64,9 +54,6 @@ public class ConnectionFacade {
             throw new NotConnectedException("Not connected to asterisk.");
         }
         mainThread.interrupt();
-        if (this.enablePingThread && pingThread.isAlive()) {
-            pingThread.interrupt();
-        }
     }
 
     private void reconnect() throws IOException, NotAuthorizedException {
@@ -108,9 +95,5 @@ public class ConnectionFacade {
                 }
             }
         };
-    }
-
-    private void createPingThread() {
-        pingThread = new Thread(new PingThread(connection, connectionConfiguration));
     }
 }
