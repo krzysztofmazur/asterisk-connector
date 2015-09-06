@@ -16,23 +16,14 @@ public class TestClass {
         Connection connection = new Connection();
         ConnectionFacade conn = new ConnectionFacade(connection, configuration);
         MessageProcessorImpl messageProcessor = new MessageProcessorImpl();
-        EventProcessor eventProcessor = new EventProcessor();
+        EventProcessor<Event> eventProcessor = new EventProcessor<>();
         eventProcessor.setPattern(Pattern.compile("^.*"));
         eventProcessor.setParser(new StandardEventParser());
-        eventProcessor.setHandler(new EventHandler<Event>() {
-            @Override
-            public void handle(Event event) {
-                System.out.println(event.getEventName());
-            }
-        });
-        messageProcessor.setDefaultResponseHandler(response1 -> {
-            System.out.println(response1.getMessage());
-        });
+        eventProcessor.setHandler(event -> System.out.println(event.getEventName()));
+        messageProcessor.setDefaultResponseHandler(response1 -> System.out.println(response1.getMessage()));
         messageProcessor.addEventProcessor(eventProcessor);
         conn.setMessageProcessor(messageProcessor);
         conn.start();
-        conn.sendAction(new Action("QueueStatus"), response -> {
-            System.out.println(response.getMessage());
-        });
+        conn.sendAction(new Action("QueueStatus"), response -> System.out.println(response.getMessage()));
     }
 }
