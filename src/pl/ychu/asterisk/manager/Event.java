@@ -32,11 +32,6 @@ public class Event {
         return map.get(variableName);
     }
 
-    public static Event parseEvent(String message) {
-        Event e = new Event(message);
-        return e;
-    }
-
     protected void setEventName(String eventName) {
         this.eventName = eventName;
     }

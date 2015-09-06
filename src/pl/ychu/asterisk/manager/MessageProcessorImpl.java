@@ -37,7 +37,7 @@ public class MessageProcessorImpl implements MessageProcessor {
 
 
     private void processEvent(String message) {
-        Event e = Event.parseEvent(message);
+        Event e = new Event(message);
         synchronized (mutex) {
             for (EventHandler handler : handlers) {
                 new Thread(new EventAsyncHelper(e, handler)).start();
