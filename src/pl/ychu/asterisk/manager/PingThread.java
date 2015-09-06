@@ -5,12 +5,12 @@ import pl.ychu.asterisk.manager.connection.Writer;
 
 import java.io.IOException;
 
-public class ConnectionMaintainingThread implements Runnable {
+public class PingThread implements Runnable {
 
     private Writer writer;
     private Connection connection;
 
-    public ConnectionMaintainingThread(Connection connection) {
+    public PingThread(Connection connection) {
         this.connection = connection;
         this.writer = connection.getWriter();
     }

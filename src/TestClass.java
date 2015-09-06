@@ -10,17 +10,15 @@ import java.util.concurrent.TimeoutException;
 public class TestClass {
     public static void main(String[] args) throws IOException, InterruptedException, TimeoutException, NotAuthorizedException, NotConnectedException {
         Connection connection = new Connection(new ConnectionConfiguration());
-        AsynchronizedConnection conn = new AsynchronizedConnection(connection, new MessageProcessorImpl(), new EventHandler() {
+        AsyncConnector conn = new AsyncConnector(connection, new MessageProcessorImpl());
+        conn.addHandler(new EventHandler() {
             @Override
             public void handleEvent(Event event) {
-                //System.out.println(System.currentTimeMillis() + ": " + event.getEventName());
-                Event e = (Event) event;
-                System.out.println(e.getMessage());
+                System.out.println(event.getMessage());
             }
 
             @Override
             public void handleResponse(Response response) {
-                //System.out.println(response.getMessage());
             }
         });
         conn.start();
@@ -30,11 +28,5 @@ public class TestClass {
                 System.out.println(response.getMessage());
             }
         });
-
-/*
-        conn.sendAction(new ListCommands());
-        SynchronizedActionSender sender = new SynchronizedActionSender(connection);
-        System.out.println(sender.send(new ListCommands()).getMessage());
-        sender.closeConnection();*/
     }
 }
