@@ -19,7 +19,7 @@ public class TestClass {
         EventProcessor eventProcessor = new EventProcessor();
         eventProcessor.setPattern(Pattern.compile("^.*"));
         eventProcessor.setParser(new StandardEventParser());
-        eventProcessor.setHandler(new pl.ychu.asterisk.manager.event.EventHandler<Event>() {
+        eventProcessor.setHandler(new EventHandler<Event>() {
             @Override
             public void handle(Event event) {
                 System.out.println(event.getEventName());
