@@ -23,6 +23,7 @@ public class TestClass {
 
             @Override
             public void handleResponse(Response response) {
+                System.out.println(response.getMessage());
             }
         });
         conn.start();
