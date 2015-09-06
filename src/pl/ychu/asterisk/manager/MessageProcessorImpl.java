@@ -106,7 +106,7 @@ public class MessageProcessorImpl implements MessageProcessor {
         public List<EventProcessor> getMatchedProcessors(String message) {
             List<EventProcessor> result = new ArrayList<>();
             for (EventProcessor processor : list) {
-                if (processor.getParser().getPattern().matcher(message).find()) {
+                if (processor.getPattern().matcher(message).find()) {
                     result.add(processor);
                 }
             }

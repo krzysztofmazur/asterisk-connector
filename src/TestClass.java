@@ -8,6 +8,7 @@ import pl.ychu.asterisk.manager.exception.NotConnectedException;
 
 import java.io.IOException;
 import java.util.concurrent.TimeoutException;
+import java.util.regex.Pattern;
 
 public class TestClass {
     public static void main(String[] args) throws IOException, InterruptedException, TimeoutException, NotAuthorizedException, NotConnectedException {
@@ -16,6 +17,7 @@ public class TestClass {
         ConnectionFacade conn = new ConnectionFacade(connection, configuration);
         MessageProcessorImpl messageProcessor = new MessageProcessorImpl();
         EventProcessor eventProcessor = new EventProcessor();
+        eventProcessor.setPattern(Pattern.compile("^.*"));
         eventProcessor.setParser(new StandardEventParser());
         eventProcessor.setHandler(new pl.ychu.asterisk.manager.event.EventHandler<Event>() {
             @Override
