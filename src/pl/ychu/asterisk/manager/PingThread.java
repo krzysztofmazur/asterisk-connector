@@ -8,13 +8,11 @@ import java.io.IOException;
 
 public class PingThread implements Runnable {
 
-    private Writer writer;
     private Connection connection;
     private ConnectionConfiguration connectionConfiguration;
 
     public PingThread(Connection connection, ConnectionConfiguration connectionConfiguration) {
         this.connection = connection;
-        this.writer = connection.getWriter();
         this.connectionConfiguration = connectionConfiguration;
     }
 
@@ -27,8 +25,8 @@ public class PingThread implements Runnable {
                 break;
             }
             try {
-                if (writer != null && connection.isConnected()) {
-                    writer.send(new Action("Ping"));
+                if (connection.isConnected()) {
+                    connection.getWriter().send(new Action("Ping"));
                 }
             } catch (IOException ignored) {
             }
