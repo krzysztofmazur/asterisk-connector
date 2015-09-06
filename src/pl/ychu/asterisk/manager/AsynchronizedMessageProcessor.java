@@ -37,7 +37,7 @@ public class AsynchronizedMessageProcessor implements MessageProcessor {
 
 
     private void processEvent(String message) {
-        UnifiedEvent e = UnifiedEvent.parseEvent(message);
+        Event e = Event.parseEvent(message);
         synchronized (mutex) {
             for (EventHandler handler : handlers) {
                 new Thread(new EventAsyncHelper(e, handler)).start();
@@ -46,7 +46,7 @@ public class AsynchronizedMessageProcessor implements MessageProcessor {
     }
 
     private void processResponse(String message) {
-        UnifiedResponse r = new UnifiedResponse(message);
+        Response r = new Response(message);
         ResponseHandler handler = responseHandlers.get(r.getActionId());
         if (handler != null) {
             new Thread(new ResponseAsyncHelper(r, handler)).start();
@@ -86,47 +86,47 @@ public class AsynchronizedMessageProcessor implements MessageProcessor {
 
     private class ResponseAsyncHelper implements Runnable {
 
-        private UnifiedResponse unifiedResponse;
+        private Response response;
         private ResponseHandler handler;
 
-        public ResponseAsyncHelper(UnifiedResponse unifiedResponse, ResponseHandler handler) {
-            this.unifiedResponse = unifiedResponse;
+        public ResponseAsyncHelper(Response response, ResponseHandler handler) {
+            this.response = response;
             this.handler = handler;
         }
 
         @Override
         public void run() {
-            handler.handleResponse(unifiedResponse);
+            handler.handleResponse(response);
         }
     }
 
     private class DefaultResponseAsyncHelper implements Runnable {
-        private UnifiedResponse unifiedResponse;
+        private Response response;
         private EventHandler handler;
 
-        public DefaultResponseAsyncHelper(UnifiedResponse unifiedResponse, EventHandler handler) {
-            this.unifiedResponse = unifiedResponse;
+        public DefaultResponseAsyncHelper(Response response, EventHandler handler) {
+            this.response = response;
             this.handler = handler;
         }
 
         @Override
         public void run() {
-            handler.handleResponse(unifiedResponse);
+            handler.handleResponse(response);
         }
     }
 
     private class EventAsyncHelper implements Runnable {
-        private UnifiedEvent unifiedEvent;
+        private Event event;
         private EventHandler handler;
 
-        public EventAsyncHelper(UnifiedEvent unifiedEvent, EventHandler handler) {
-            this.unifiedEvent = unifiedEvent;
+        public EventAsyncHelper(Event event, EventHandler handler) {
+            this.event = event;
             this.handler = handler;
         }
 
         @Override
         public void run() {
-            handler.handleEvent(unifiedEvent);
+            handler.handleEvent(event);
         }
     }
 }

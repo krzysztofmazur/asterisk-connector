@@ -11,7 +11,7 @@ import java.io.IOException;
 public class AsynchronizedConnection {
     private final Connection connection;
     private final Object mutex;
-    private final ActionId actionIdFactory;
+    private final ActionIdGenerator actionIdFactory;
     private Thread mainThread;
     private Thread maintainingThread;
     private Writer writer;
@@ -24,7 +24,7 @@ public class AsynchronizedConnection {
         this.connection = connection;
         this.msgProcessor = msgProcessor;
         this.mutex = new Object();
-        this.actionIdFactory = new ActionId();
+        this.actionIdFactory = new ActionIdGenerator();
         this.createThread();
         this.createMaintainingThread();
 

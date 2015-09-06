@@ -10,7 +10,7 @@ import java.io.IOException;
 public class SynchronizedConnection {
     private final Connection connection;
     private final Object mutex;
-    private final ActionId actionIdFactory;
+    private final ActionIdGenerator actionIdFactory;
     private Writer writer;
     private Reader reader;
     private boolean working;
@@ -21,7 +21,7 @@ public class SynchronizedConnection {
         this.connection = connection;
         this.msgProcessor = msgProcessor;
         this.mutex = new Object();
-        this.actionIdFactory = new ActionId();
+        this.actionIdFactory = new ActionIdGenerator();
 
     }
 

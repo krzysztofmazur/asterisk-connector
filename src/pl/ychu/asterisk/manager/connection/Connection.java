@@ -1,6 +1,6 @@
 package pl.ychu.asterisk.manager.connection;
 
-import pl.ychu.asterisk.manager.UnifiedAction;
+import pl.ychu.asterisk.manager.Action;
 import pl.ychu.asterisk.manager.exception.NotAuthorizedException;
 
 import java.io.IOException;
@@ -29,7 +29,7 @@ public class Connection {
         reader = new Reader(client.getInputStream());
         writer = new Writer(client.getOutputStream());
 
-        UnifiedAction l = new UnifiedAction("Login");
+        Action l = new Action("Login");
         l.putVariable("Username", connectionConfiguration.getUserName());
         l.putVariable("Secret", connectionConfiguration.getUserPassword());
         if (!connectionConfiguration.isListeningEvents()) {

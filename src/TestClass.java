@@ -14,7 +14,7 @@ public class TestClass {
             @Override
             public void handleEvent(Event event) {
                 //System.out.println(System.currentTimeMillis() + ": " + event.getEventName());
-                UnifiedEvent e = (UnifiedEvent) event;
+                Event e = (Event) event;
                 System.out.println(e.getMessage());
             }
 
@@ -24,7 +24,7 @@ public class TestClass {
             }
         });
         conn.start();
-        conn.sendAction(new UnifiedAction("QueueStatus"), new ResponseHandler() {
+        conn.sendAction(new Action("QueueStatus"), new ResponseHandler() {
             @Override
             public void handleResponse(Response response) {
                 System.out.println(response.getMessage());

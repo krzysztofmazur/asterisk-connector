@@ -36,7 +36,7 @@ public class SynchronizedMessageProcessor implements MessageProcessor {
     }
 
     private void processEvent(String message) {
-        UnifiedEvent e = UnifiedEvent.parseEvent(message);
+        Event e = Event.parseEvent(message);
         synchronized (mutex) {
             for (EventHandler handler : handlers) {
                 handler.handleEvent(e);
@@ -45,7 +45,7 @@ public class SynchronizedMessageProcessor implements MessageProcessor {
     }
 
     private void processResponse(String message) {
-        UnifiedResponse r = new UnifiedResponse(message);
+        Response r = new Response(message);
         ResponseHandler handler = responseHandlers.get(r.getActionId());
         if (handler != null) {
             handler.handleResponse(r);

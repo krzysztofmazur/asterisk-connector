@@ -25,7 +25,7 @@ public class ConnectionMaintainingThread implements Runnable {
             }
             try {
                 if (writer != null && connection.isConnected()) {
-                    writer.send(new UnifiedAction("Ping"));
+                    writer.send(new Action("Ping"));
                 }
             } catch (IOException ex) {
             }
