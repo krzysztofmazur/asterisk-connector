@@ -11,6 +11,7 @@ import java.io.IOException;
 public class ConnectionFacade {
     private final Connection connection;
     private final ActionIdGenerator actionIdFactory;
+    private ConnectionConfiguration connectionConfiguration;
     private Thread mainThread;
     private Thread pingThread;
     private Writer writer;
@@ -18,8 +19,9 @@ public class ConnectionFacade {
     private boolean enablePingThread = true;
     private MessageProcessor msgProcessor;
 
-    public ConnectionFacade(Connection connection) {
+    public ConnectionFacade(Connection connection, ConnectionConfiguration connectionConfiguration) {
         this.connection = connection;
+        this.connectionConfiguration = connectionConfiguration;
         this.actionIdFactory = new ActionIdGenerator();
         this.createThread();
         this.createPingThread();
@@ -75,8 +77,15 @@ public class ConnectionFacade {
 
     private void reconnect() throws IOException, NotAuthorizedException {
         connection.connect();
+        Action loginAction = new Action("Login");
+        loginAction.putVariable("Username", connectionConfiguration.getUserName());
+        loginAction.putVariable("Secret", connectionConfiguration.getUserPassword());
         working = true;
         writer = connection.getWriter();
+        writer.send(loginAction);
+        if (!connection.getReader().readMessage().contains("Success")) {
+            throw new NotAuthorizedException("Bad user name or secret.");
+        }
         msgProcessor.setReader(connection.getReader());
     }
 
@@ -109,6 +118,6 @@ public class ConnectionFacade {
     }
 
     private void createPingThread() {
-        pingThread = new Thread(new PingThread(connection));
+        pingThread = new Thread(new PingThread(connection, connectionConfiguration));
     }
 }

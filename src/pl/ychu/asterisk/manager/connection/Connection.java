@@ -1,44 +1,29 @@
 package pl.ychu.asterisk.manager.connection;
 
-import pl.ychu.asterisk.manager.Action;
-import pl.ychu.asterisk.manager.exception.NotAuthorizedException;
-
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 
 public class Connection {
+    private String hostName = "127.0.0.1";
+    private int hostPort = 5038;
+    private int connectionTimeout = 5000;
+    private int readTimeout = 30000;
+
     private Socket client;
-    private ConnectionConfiguration connectionConfiguration;
-    private boolean connected = false;
     private Reader reader;
     private Writer writer;
 
-    public Connection(ConnectionConfiguration connectionConfiguration) {
-        this.connectionConfiguration = connectionConfiguration;
-    }
-
-    public void connect() throws IOException, NotAuthorizedException {
+    public void connect() throws IOException {
         client = new Socket();
-        client.setSoTimeout(connectionConfiguration.getReadTimeout() * 2);
+        client.setSoTimeout(readTimeout * 2);
         client.connect(new InetSocketAddress(
-                connectionConfiguration.getHostName(),
-                connectionConfiguration.getHostPort()
-        ), connectionConfiguration.getConnectTimeout());
+                hostName,
+                hostPort
+        ), connectionTimeout);
 
         reader = new Reader(client.getInputStream());
         writer = new Writer(client.getOutputStream());
-
-        Action l = new Action("Login");
-        l.putVariable("Username", connectionConfiguration.getUserName());
-        l.putVariable("Secret", connectionConfiguration.getUserPassword());
-        if (!connectionConfiguration.isListeningEvents()) {
-            l.putVariable("Events", "off");
-        }
-        writer.send(l);
-        if (!reader.readMessage().contains("Success")) {
-            throw new NotAuthorizedException("Bad user name or secret.");
-        }
     }
 
     public void close() throws IOException {
@@ -48,7 +33,7 @@ public class Connection {
     }
 
     public boolean isConnected() {
-        return connected;
+        return client.isConnected();
     }
 
     public Reader getReader() {
@@ -59,7 +44,19 @@ public class Connection {
         return writer;
     }
 
-    public ConnectionConfiguration getConnectionConfiguration() {
-        return this.connectionConfiguration;
+    public void setHostName(String hostName) {
+        this.hostName = hostName;
+    }
+
+    public void setHostPort(int hostPort) {
+        this.hostPort = hostPort;
+    }
+
+    public void setConnectionTimeout(int connectionTimeout) {
+        this.connectionTimeout = connectionTimeout;
+    }
+
+    public void setReadTimeout(int readTimeout) {
+        this.readTimeout = readTimeout;
     }
 }

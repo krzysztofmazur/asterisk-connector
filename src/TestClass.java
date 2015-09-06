@@ -10,8 +10,9 @@ import java.util.concurrent.TimeoutException;
 
 public class TestClass {
     public static void main(String[] args) throws IOException, InterruptedException, TimeoutException, NotAuthorizedException, NotConnectedException {
-        Connection connection = new Connection(new ConnectionConfiguration());
-        ConnectionFacade conn = new ConnectionFacade(connection);
+        ConnectionConfiguration configuration = new ConnectionConfiguration();
+        Connection connection = new Connection();
+        ConnectionFacade conn = new ConnectionFacade(connection, configuration);
         conn.setMessageProcessor(new MessageProcessorImpl());
         conn.addHandler(new EventHandler() {
             @Override
