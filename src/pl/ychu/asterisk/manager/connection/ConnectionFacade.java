@@ -92,7 +92,7 @@ public class ConnectionFacade {
                             reconnect();
                         }
                         while (!Thread.currentThread().isInterrupted()) {
-                            msgProcessor.processMessage();
+                            msgProcessor.processMessage(connection.getReader().readMessage());
                         }
                     } catch (IOException ex) {
                         working = false;

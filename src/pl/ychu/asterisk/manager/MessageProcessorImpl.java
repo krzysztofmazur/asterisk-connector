@@ -13,7 +13,6 @@ public class MessageProcessorImpl implements MessageProcessor {
     private final Pattern actionIdPattern;
     private final HashMap<String, ResponseHandler> responseHandlers;
     private Reader reader;
-    private final Object mutex;
 
     private EventProcessorRepository eventProcessorRepository;
     private ResponseHandler defaultResponseHandler;
@@ -23,7 +22,6 @@ public class MessageProcessorImpl implements MessageProcessor {
         this.eventPattern = Pattern.compile("^(Event:).*");
         this.responsePattern = Pattern.compile("^.*(Response:).*");
         this.actionIdPattern = Pattern.compile("^.*(ActionID:).*");
-        this.mutex = new Object();
 
         eventProcessorRepository = new EventProcessorRepository();
     }
@@ -37,8 +35,7 @@ public class MessageProcessorImpl implements MessageProcessor {
     }
 
     @Override
-    public void processMessage() throws IOException {
-        String message = reader.readMessage();
+    public void processMessage(String message) throws IOException {
         if (responsePattern.matcher(message).find() || actionIdPattern.matcher(message).find()) {
             processResponse(message);
         } else if (eventPattern.matcher(message).find()) {

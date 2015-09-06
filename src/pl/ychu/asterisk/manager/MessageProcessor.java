@@ -5,7 +5,7 @@ import pl.ychu.asterisk.manager.connection.Reader;
 import java.io.IOException;
 
 public interface MessageProcessor {
-    void processMessage() throws IOException;
+    void processMessage(String message) throws IOException;
 
     void addResponseHandler(String actionId, ResponseHandler responseHandler);
 
