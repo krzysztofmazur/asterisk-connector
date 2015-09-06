@@ -1,5 +1,6 @@
 import pl.ychu.asterisk.manager.*;
 import pl.ychu.asterisk.manager.action.Action;
+import pl.ychu.asterisk.manager.action.ResponseParserImpl;
 import pl.ychu.asterisk.manager.connection.Connection;
 import pl.ychu.asterisk.manager.connection.ConnectionConfiguration;
 import pl.ychu.asterisk.manager.connection.ConnectionFacade;
@@ -21,11 +22,12 @@ public class TestClass {
         eventProcessor.setPattern(Pattern.compile("^.*"));
         eventProcessor.setParser(new StandardEventParser());
         eventProcessor.setHandler(event -> System.out.println(event.getEventName()));
-        messageProcessor.setDefaultResponseHandler(response1 -> System.out.println(response1.getMessage()));
+        messageProcessor.setDefaultResponseHandler(response1 -> System.out.println(response1.getResponseStatus()));
         messageProcessor.addEventProcessor(eventProcessor);
+        messageProcessor.setResponseParser(new ResponseParserImpl());
         conn.setMessageProcessor(messageProcessor);
         conn.start();
-        conn.sendAction(new Action("QueueStatus"), response -> System.out.println(response.getMessage()));
+        conn.sendAction(new Action("QueueStatus"), response -> System.out.println(response.getResponseStatus()));
         (new Thread(new PingThread(conn))).start();
     }
 

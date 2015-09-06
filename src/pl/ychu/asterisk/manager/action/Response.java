@@ -3,45 +3,19 @@ package pl.ychu.asterisk.manager.action;
 import java.util.HashMap;
 
 public class Response {
-    private HashMap<String, String> vars;
-    private String addrInfo;
-    private String message;
+    private HashMap<String, String> variables;
+    private String additionalData;
 
-    public Response(String message) {
-        this.message = message;
-        this.parse();
-    }
-
-    protected void parse()
-    {
-        StringBuilder sb = new StringBuilder(1000);
-        this.vars = new HashMap<>();
-        for (String line : message.split("\n")) {
-            if (line.endsWith("\r") && line.length() != 0) {
-                String[] lineS = line.split(":", 2);
-                if (lineS.length == 2) {
-                    vars.put(lineS[0].trim(), lineS[1].trim());
-                }
-            } else {
-                sb.append(line);
-                sb.append("\n");
-            }
-        }
-        if (sb.length() != 0) {
-            addrInfo = sb.toString();
-        }
-    }
-
-    public String getMessage() {
-        return message;
+    public Response() {
+        this.variables = new HashMap<>();
     }
 
     public String getAdditionalData() {
-        return addrInfo;
+        return additionalData;
     }
 
     public String getVariable(String variableName) {
-        return vars.get(variableName);
+        return variables.get(variableName);
     }
 
     public String getResponseStatus() {
@@ -52,4 +26,11 @@ public class Response {
         return this.getVariable("ActionID");
     }
 
+    public void setAdditionalData(String additionalData) {
+        this.additionalData = additionalData;
+    }
+
+    public void addVariable(String name, String value) {
+        this.variables.put(name, value);
+    }
 }

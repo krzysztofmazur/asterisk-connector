@@ -2,6 +2,7 @@ package pl.ychu.asterisk.manager;
 
 import pl.ychu.asterisk.manager.action.Response;
 import pl.ychu.asterisk.manager.action.ResponseHandler;
+import pl.ychu.asterisk.manager.action.ResponseParser;
 import pl.ychu.asterisk.manager.event.EventProcessor;
 
 import java.io.IOException;
@@ -13,9 +14,9 @@ public class MessageProcessorImpl implements MessageProcessor {
     private final Pattern responsePattern;
     private final Pattern actionIdPattern;
     private final HashMap<String, ResponseHandler> responseHandlers;
-
     private EventProcessorRepository eventProcessorRepository;
     private ResponseHandler defaultResponseHandler;
+    private ResponseParser responseParser;
 
     public MessageProcessorImpl() {
         this.responseHandlers = new HashMap<>();
@@ -32,6 +33,10 @@ public class MessageProcessorImpl implements MessageProcessor {
 
     public void setDefaultResponseHandler(ResponseHandler defaultResponseHandler) {
         this.defaultResponseHandler = defaultResponseHandler;
+    }
+
+    public void setResponseParser(ResponseParser responseParser) {
+        this.responseParser = responseParser;
     }
 
     @Override
@@ -51,12 +56,14 @@ public class MessageProcessorImpl implements MessageProcessor {
     }
 
     private void processResponse(String message) {
-        Response r = new Response(message);
-        ResponseHandler handler = responseHandlers.get(r.getActionId());
-        if (handler != null) {
-            handler.handleResponse(r);
-        } else if (defaultResponseHandler != null) {
-            defaultResponseHandler.handleResponse(r);
+        if (responseParser != null) {
+            Response r = responseParser.parse(message);
+            ResponseHandler handler = responseHandlers.get(r.getActionId());
+            if (handler != null) {
+                handler.handleResponse(r);
+            } else if (defaultResponseHandler != null) {
+                defaultResponseHandler.handleResponse(r);
+            }
         }
     }
 
@@ -66,8 +73,8 @@ public class MessageProcessorImpl implements MessageProcessor {
     }
 
     @Override
-    public void removeResponseHandler(ResponseHandler responseHandler) {
-        responseHandlers.remove(responseHandler);
+    public void removeResponseHandler(String actionId) {
+        responseHandlers.remove(actionId);
     }
 
     private class EventProcessorRepository {

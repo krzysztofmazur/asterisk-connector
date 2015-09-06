@@ -9,5 +9,5 @@ public interface MessageProcessor {
 
     void addResponseHandler(String actionId, ResponseHandler responseHandler);
 
-    void removeResponseHandler(ResponseHandler responseHandler);
+    void removeResponseHandler(String actionId);
 }
