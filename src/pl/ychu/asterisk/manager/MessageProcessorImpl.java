@@ -54,9 +54,9 @@ public class MessageProcessorImpl implements MessageProcessor {
         Response r = new Response(message);
         ResponseHandler handler = responseHandlers.get(r.getActionId());
         if (handler != null) {
-            new Thread(new ResponseAsyncHelper(r, handler)).start();
+            handler.handleResponse(r);
         } else if (defaultResponseHandler != null) {
-            new Thread(new ResponseAsyncHelper(r, defaultResponseHandler)).start();
+            defaultResponseHandler.handleResponse(r);
         }
     }
 
@@ -68,22 +68,6 @@ public class MessageProcessorImpl implements MessageProcessor {
     @Override
     public void removeResponseHandler(ResponseHandler responseHandler) {
         responseHandlers.remove(responseHandler);
-    }
-
-    private class ResponseAsyncHelper implements Runnable {
-
-        private Response response;
-        private ResponseHandler handler;
-
-        public ResponseAsyncHelper(Response response, ResponseHandler handler) {
-            this.response = response;
-            this.handler = handler;
-        }
-
-        @Override
-        public void run() {
-            handler.handleResponse(response);
-        }
     }
 
     private class EventProcessorRepository {
