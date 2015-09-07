@@ -1,7 +1,6 @@
-package pl.ychu.asterisk.manager;
+package pl.ychu.asterisk.manager.connection;
 
 import pl.ychu.asterisk.manager.action.*;
-import pl.ychu.asterisk.manager.connection.Connection;
 import pl.ychu.asterisk.manager.event.EventProcessor;
 import pl.ychu.asterisk.manager.exception.NotConnectedException;
 
@@ -9,7 +8,7 @@ import java.io.IOException;
 import java.util.*;
 import java.util.regex.Pattern;
 
-public class MessageHandlerImpl implements MessageHandler {
+public class StandardMessageHandler implements MessageHandler {
 
     private Connection connection;
 
@@ -17,14 +16,14 @@ public class MessageHandlerImpl implements MessageHandler {
     private final Pattern responsePattern;
     private final Pattern actionIdPattern;
 
-    private ActionIdGenerator actionIdGenerator;
+    private ActionIdGeneratorInterface actionIdGenerator;
 
     private EventProcessorRepository eventProcessorRepository;
     private HashMap<String, ResponseHandler> responseHandlers;
     private ResponseHandler defaultResponseHandler;
     private ResponseParser responseParser;
 
-    public MessageHandlerImpl() {
+    public StandardMessageHandler() {
         this.responseHandlers = new HashMap<>();
         this.eventPattern = Pattern.compile("^(Event:).*");
         this.responsePattern = Pattern.compile("^.*(Response:).*");
@@ -45,7 +44,7 @@ public class MessageHandlerImpl implements MessageHandler {
         this.responseParser = responseParser;
     }
 
-    public void setActionIdGenerator(ActionIdGenerator actionIdGenerator) {
+    public void setActionIdGenerator(ActionIdGeneratorInterface actionIdGenerator) {
         this.actionIdGenerator = actionIdGenerator;
     }
 

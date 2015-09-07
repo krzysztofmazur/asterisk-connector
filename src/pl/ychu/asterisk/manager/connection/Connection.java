@@ -1,6 +1,5 @@
 package pl.ychu.asterisk.manager.connection;
 
-import pl.ychu.asterisk.manager.MessageHandler;
 import pl.ychu.asterisk.manager.action.AbstractAction;
 import pl.ychu.asterisk.manager.exception.NotAuthorizedException;
 

@@ -1,8 +1,8 @@
-import pl.ychu.asterisk.manager.*;
 import pl.ychu.asterisk.manager.action.Action;
-import pl.ychu.asterisk.manager.action.ActionIdGeneratorImpl;
+import pl.ychu.asterisk.manager.action.ActionIdGenerator;
 import pl.ychu.asterisk.manager.action.ResponseParserImpl;
 import pl.ychu.asterisk.manager.connection.Connection;
+import pl.ychu.asterisk.manager.connection.StandardMessageHandler;
 import pl.ychu.asterisk.manager.event.*;
 import pl.ychu.asterisk.manager.exception.NotAuthorizedException;
 import pl.ychu.asterisk.manager.exception.NotConnectedException;
@@ -13,15 +13,15 @@ import java.util.regex.Pattern;
 
 public class TestClass {
     public static void main(String[] args) throws IOException, InterruptedException, TimeoutException, NotAuthorizedException, NotConnectedException {
-        MessageHandlerImpl messageHandler = new MessageHandlerImpl();
-        messageHandler.setActionIdGenerator(new ActionIdGeneratorImpl());
+        StandardMessageHandler messageHandler = new StandardMessageHandler();
+        messageHandler.setActionIdGenerator(new ActionIdGenerator());
+        messageHandler.setDefaultResponseHandler(response1 -> System.out.println(response1.getResponseStatus()));
+        messageHandler.setResponseParser(new ResponseParserImpl());
         EventProcessor<Event> eventProcessor = new EventProcessor<>();
         eventProcessor.setPattern(Pattern.compile("^.*"));
         eventProcessor.setParser(new StandardEventParser());
         eventProcessor.setHandler(event -> System.out.println(event.getEventName()));
-        messageHandler.setDefaultResponseHandler(response1 -> System.out.println(response1.getResponseStatus()));
         messageHandler.addEventProcessor(eventProcessor);
-        messageHandler.setResponseParser(new ResponseParserImpl());
         Action loginAction = new Action("Login");
         loginAction.putVariable("username", "admin");
         loginAction.putVariable("secret", "secret");
@@ -35,9 +35,9 @@ public class TestClass {
 
     private static class PingThread implements Runnable {
 
-        private MessageHandlerImpl messageHandler;
+        private StandardMessageHandler messageHandler;
 
-        public PingThread(MessageHandlerImpl messageHandler) {
+        public PingThread(StandardMessageHandler messageHandler) {
             this.messageHandler = messageHandler;
         }
 
