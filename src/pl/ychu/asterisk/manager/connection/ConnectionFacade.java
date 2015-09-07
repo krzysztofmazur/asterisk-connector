@@ -18,13 +18,14 @@ public class ConnectionFacade {
     private Writer writer;
     private boolean working;
     private MessageProcessor msgProcessor;
+    private Action loginAction;
 
-    public ConnectionFacade(Connection connection, ConnectionConfiguration connectionConfiguration) {
+    public ConnectionFacade(Connection connection, ConnectionConfiguration connectionConfiguration, Action loginAction) {
         this.connection = connection;
         this.connectionConfiguration = connectionConfiguration;
         this.actionIdFactory = new ActionIdGenerator();
         this.createThread();
-
+        this.loginAction = loginAction;
     }
 
     public void setMessageProcessor(MessageProcessor messageProcessor) {
@@ -57,14 +58,11 @@ public class ConnectionFacade {
     }
 
     private void reconnect() throws IOException, NotAuthorizedException {
-        connection.connect();
-        Action loginAction = new Action("Login");
-        loginAction.putVariable("Username", connectionConfiguration.getUserName());
-        loginAction.putVariable("Secret", connectionConfiguration.getUserPassword());
-        working = true;
-        writer = connection.getWriter();
-        writer.send(loginAction);
-        if (!connection.getReader().readMessage().contains("Success")) {
+        this.connection.connect();
+        this.working = true;
+        this.writer = connection.getWriter();
+        this.sendAction(this.loginAction);
+        if (!this.connection.getReader().readMessage().contains("Success")) {
             throw new NotAuthorizedException("Bad user name or secret.");
         }
     }

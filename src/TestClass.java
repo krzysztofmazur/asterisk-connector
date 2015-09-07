@@ -16,7 +16,10 @@ public class TestClass {
     public static void main(String[] args) throws IOException, InterruptedException, TimeoutException, NotAuthorizedException, NotConnectedException {
         ConnectionConfiguration configuration = new ConnectionConfiguration();
         Connection connection = new Connection();
-        ConnectionFacade conn = new ConnectionFacade(connection, configuration);
+        Action loginAction = new Action("Login");
+        loginAction.putVariable("username", configuration.getUserName());
+        loginAction.putVariable("secret", configuration.getUserPassword());
+        ConnectionFacade conn = new ConnectionFacade(connection, configuration, loginAction);
         MessageProcessorImpl messageProcessor = new MessageProcessorImpl();
         EventProcessor<Event> eventProcessor = new EventProcessor<>();
         eventProcessor.setPattern(Pattern.compile("^.*"));
