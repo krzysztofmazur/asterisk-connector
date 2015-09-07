@@ -13,10 +13,8 @@ import java.util.regex.Pattern;
 
 public class TestClass {
     public static void main(String[] args) throws IOException, InterruptedException, TimeoutException, NotAuthorizedException, NotConnectedException {
-        Connection connection = new Connection();
         MessageHandlerImpl messageHandler = new MessageHandlerImpl();
         messageHandler.setActionIdGenerator(new ActionIdGeneratorImpl());
-        connection.setMessageHandler(messageHandler);
         EventProcessor<Event> eventProcessor = new EventProcessor<>();
         eventProcessor.setPattern(Pattern.compile("^.*"));
         eventProcessor.setParser(new StandardEventParser());
@@ -27,6 +25,9 @@ public class TestClass {
         Action loginAction = new Action("Login");
         loginAction.putVariable("username", "admin");
         loginAction.putVariable("secret", "secret");
+
+        Connection connection = new Connection();
+        connection.setMessageHandler(messageHandler);
         connection.connect(loginAction);
         messageHandler.sendAction(new Action("QueueStatus"), response -> System.out.println(response.getResponseStatus()));
         (new Thread(new PingThread(messageHandler))).start();
