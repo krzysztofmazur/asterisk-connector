@@ -1,6 +1,6 @@
 package pl.ychu.asterisk.manager.connection;
 
-import pl.ychu.asterisk.manager.Action;
+import pl.ychu.asterisk.manager.action.AbstractAction;
 import pl.ychu.asterisk.manager.exception.NotAuthorizedException;
 
 import java.io.IOException;
@@ -8,58 +8,115 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 
 public class Connection {
+    private String hostName = "127.0.0.1";
+    private int hostPort = 5038;
+    private int connectionTimeout = 5000;
+    private int readTimeout = 30000;
+
     private Socket client;
-    private ConnectionConfiguration connectionConfiguration;
-    private boolean connected = false;
     private Reader reader;
     private Writer writer;
+    private Thread thread;
 
-    public Connection(ConnectionConfiguration connectionConfiguration) {
-        this.connectionConfiguration = connectionConfiguration;
+    private MessageHandler messageHandler;
+    private AbstractAction loginAction;
+
+    public Connection() {
+        this.createThread();
     }
 
-    public void connect() throws IOException, NotAuthorizedException {
-        client = new Socket();
-        client.setSoTimeout(connectionConfiguration.getReadTimeout() * 2);
-        client.connect(new InetSocketAddress(
-                connectionConfiguration.getHostName(),
-                connectionConfiguration.getHostPort()
-        ), connectionConfiguration.getConnectTimeout());
+    public void connect(AbstractAction loginAction) throws IOException, NotAuthorizedException {
+        this.client = new Socket();
+        this.client.setSoTimeout(this.readTimeout * 2);
+        this.client.connect(new InetSocketAddress(
+                hostName,
+                hostPort
+        ), this.connectionTimeout);
 
-        reader = new Reader(client.getInputStream());
-        writer = new Writer(client.getOutputStream());
+        this.reader = new Reader(client.getInputStream());
+        this.writer = new Writer(client.getOutputStream());
 
-        Action l = new Action("Login");
-        l.putVariable("Username", connectionConfiguration.getUserName());
-        l.putVariable("Secret", connectionConfiguration.getUserPassword());
-        if (!connectionConfiguration.isListeningEvents()) {
-            l.putVariable("Events", "off");
-        }
-        writer.send(l);
-        if (!reader.readMessage().contains("Success")) {
+        this.login(loginAction);
+        this.thread.start();
+    }
+
+    private void login(AbstractAction loginAction) throws IOException, NotAuthorizedException {
+        this.loginAction = loginAction;
+        this.writer.send(loginAction);
+        if (!this.reader.readMessage().contains("Success")) {
             throw new NotAuthorizedException("Bad user name or secret.");
         }
     }
 
     public void close() throws IOException {
-        reader.close();
-        writer.close();
-        client.close();
+        this.thread.interrupt();
+        this.reader.close();
+        this.writer.close();
+        this.client.close();
     }
 
     public boolean isConnected() {
-        return connected;
+        return this.client.isConnected();
     }
 
     public Reader getReader() {
-        return reader;
+        return this.reader;
     }
 
     public Writer getWriter() {
-        return writer;
+        return this.writer;
     }
 
-    public ConnectionConfiguration getConnectionConfiguration() {
-        return this.connectionConfiguration;
+    public MessageHandler getMessageHandler() {
+        return messageHandler;
+    }
+
+    public void setMessageHandler(MessageHandler messageHandler) {
+        this.messageHandler = messageHandler;
+        messageHandler.setConnection(this);
+    }
+
+    public void setHostName(String hostName) {
+        this.hostName = hostName;
+    }
+
+    public void setHostPort(int hostPort) {
+        this.hostPort = hostPort;
+    }
+
+    public void setConnectionTimeout(int connectionTimeout) {
+        this.connectionTimeout = connectionTimeout;
+    }
+
+    public void setReadTimeout(int readTimeout) {
+        this.readTimeout = readTimeout;
+    }
+
+    private void createThread() {
+        this.thread = new Thread() {
+            @Override
+            public void run() {
+                while (!Thread.currentThread().isInterrupted()) {
+                    try {
+                        if (!isConnected()) {
+                            connect(loginAction);
+                        }
+                        while (!Thread.currentThread().isInterrupted()) {
+                            if (messageHandler != null) {
+                                messageHandler.processMessage(reader.readMessage());
+                            }
+                        }
+                    } catch (IOException ex) {
+                        try {
+                            Thread.sleep(1000);
+                        } catch (InterruptedException ex2) {
+                            break;
+                        }
+                    } catch (NotAuthorizedException ignore) {
+                        break;
+                    }
+                }
+            }
+        };
     }
 }

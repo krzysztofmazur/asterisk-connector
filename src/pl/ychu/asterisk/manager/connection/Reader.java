@@ -20,13 +20,14 @@ public class Reader {
         while (true) {
             last = (char) is.read();
             sb.append(last);
-            if (sb.length() > 3) {
-                int tmpPos = sb.length();
-                if (sb.charAt(tmpPos - 3) == '\n' && sb.charAt(tmpPos - 2) == '\r') {
-                    break;
-                }
+            if (sb.length() <= 3) {
+                continue;
+            }
+            if (sb.charAt(sb.length() - 3) == '\n' && sb.charAt(sb.length() - 2) == '\r') {
+                break;
             }
         }
+
         return sb.toString();
     }
 

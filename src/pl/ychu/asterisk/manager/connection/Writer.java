@@ -1,6 +1,6 @@
 package pl.ychu.asterisk.manager.connection;
 
-import pl.ychu.asterisk.manager.Action;
+import pl.ychu.asterisk.manager.action.AbstractAction;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -16,13 +16,11 @@ public class Writer {
         this.os = os;
     }
 
-    public void send(Action action) throws IOException {
-        synchronized (this) {
-            os.write(action.getBytes());
-        }
+    public synchronized void send(AbstractAction action) throws IOException {
+        os.write(action.getBytes());
     }
 
-    public void close() throws IOException {
+    public synchronized void close() throws IOException {
         os.close();
     }
 }
