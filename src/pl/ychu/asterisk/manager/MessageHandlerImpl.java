@@ -1,24 +1,30 @@
 package pl.ychu.asterisk.manager;
 
-import pl.ychu.asterisk.manager.action.Response;
-import pl.ychu.asterisk.manager.action.ResponseHandler;
-import pl.ychu.asterisk.manager.action.ResponseParser;
+import pl.ychu.asterisk.manager.action.*;
+import pl.ychu.asterisk.manager.connection.Connection;
 import pl.ychu.asterisk.manager.event.EventProcessor;
+import pl.ychu.asterisk.manager.exception.NotConnectedException;
 
 import java.io.IOException;
 import java.util.*;
 import java.util.regex.Pattern;
 
-public class MessageProcessorImpl implements MessageProcessor {
+public class MessageHandlerImpl implements MessageHandler {
+
+    private Connection connection;
+
     private final Pattern eventPattern;
     private final Pattern responsePattern;
     private final Pattern actionIdPattern;
-    private final HashMap<String, ResponseHandler> responseHandlers;
+
+    private ActionIdGenerator actionIdGenerator;
+
     private EventProcessorRepository eventProcessorRepository;
+    private HashMap<String, ResponseHandler> responseHandlers;
     private ResponseHandler defaultResponseHandler;
     private ResponseParser responseParser;
 
-    public MessageProcessorImpl() {
+    public MessageHandlerImpl() {
         this.responseHandlers = new HashMap<>();
         this.eventPattern = Pattern.compile("^(Event:).*");
         this.responsePattern = Pattern.compile("^.*(Response:).*");
@@ -39,8 +45,12 @@ public class MessageProcessorImpl implements MessageProcessor {
         this.responseParser = responseParser;
     }
 
+    public void setActionIdGenerator(ActionIdGenerator actionIdGenerator) {
+        this.actionIdGenerator = actionIdGenerator;
+    }
+
     @Override
-    public void processMessage(String message) throws IOException {
+    public void processMessage(String message) {
         if (responsePattern.matcher(message).find() || actionIdPattern.matcher(message).find()) {
             processResponse(message);
         } else if (eventPattern.matcher(message).find()) {
@@ -48,6 +58,10 @@ public class MessageProcessorImpl implements MessageProcessor {
         }
     }
 
+    @Override
+    public void setConnection(Connection connection) {
+        this.connection = connection;
+    }
 
     private void processEvent(String message) {
         for (EventProcessor eventProcessor : eventProcessorRepository.getMatchedProcessors(message)) {
@@ -67,14 +81,19 @@ public class MessageProcessorImpl implements MessageProcessor {
         }
     }
 
-    @Override
-    public void addResponseHandler(String actionId, ResponseHandler responseHandler) {
-        responseHandlers.put(actionId, responseHandler);
+    public void sendAction(AbstractAction action) throws IOException, NotConnectedException {
+        if (!connection.isConnected()) {
+            throw new NotConnectedException("Not connected to asterisk.");
+        }
+        connection.getWriter().send(action);
     }
 
-    @Override
-    public void removeResponseHandler(String actionId) {
-        responseHandlers.remove(actionId);
+    public void sendAction(AbstractAction action, ResponseHandler handler) throws IOException, NotConnectedException {
+        if (this.actionIdGenerator == null) {
+            throw new IllegalStateException("Set ActionIdGenerator before you send action with response handler.");
+        }
+        responseHandlers.put(action.getActionId(), handler);
+        this.sendAction(action);
     }
 
     private class EventProcessorRepository {

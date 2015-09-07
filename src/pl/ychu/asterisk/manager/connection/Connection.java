@@ -1,5 +1,9 @@
 package pl.ychu.asterisk.manager.connection;
 
+import pl.ychu.asterisk.manager.MessageHandler;
+import pl.ychu.asterisk.manager.action.AbstractAction;
+import pl.ychu.asterisk.manager.exception.NotAuthorizedException;
+
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
@@ -13,35 +17,64 @@ public class Connection {
     private Socket client;
     private Reader reader;
     private Writer writer;
+    private Thread thread;
 
-    public void connect() throws IOException {
-        client = new Socket();
-        client.setSoTimeout(readTimeout * 2);
-        client.connect(new InetSocketAddress(
+    private MessageHandler messageHandler;
+    private AbstractAction loginAction;
+
+    public Connection() {
+        this.createThread();
+    }
+
+    public void connect(AbstractAction loginAction) throws IOException, NotAuthorizedException {
+        this.client = new Socket();
+        this.client.setSoTimeout(this.readTimeout * 2);
+        this.client.connect(new InetSocketAddress(
                 hostName,
                 hostPort
-        ), connectionTimeout);
+        ), this.connectionTimeout);
 
-        reader = new Reader(client.getInputStream());
-        writer = new Writer(client.getOutputStream());
+        this.reader = new Reader(client.getInputStream());
+        this.writer = new Writer(client.getOutputStream());
+
+        this.login(loginAction);
+        this.thread.start();
+    }
+
+    private void login(AbstractAction loginAction) throws IOException, NotAuthorizedException {
+        this.loginAction = loginAction;
+        this.writer.send(loginAction);
+        if (!this.reader.readMessage().contains("Success")) {
+            throw new NotAuthorizedException("Bad user name or secret.");
+        }
     }
 
     public void close() throws IOException {
-        reader.close();
-        writer.close();
-        client.close();
+        this.thread.interrupt();
+        this.reader.close();
+        this.writer.close();
+        this.client.close();
     }
 
     public boolean isConnected() {
-        return client.isConnected();
+        return this.client.isConnected();
     }
 
     public Reader getReader() {
-        return reader;
+        return this.reader;
     }
 
     public Writer getWriter() {
-        return writer;
+        return this.writer;
+    }
+
+    public MessageHandler getMessageHandler() {
+        return messageHandler;
+    }
+
+    public void setMessageHandler(MessageHandler messageHandler) {
+        this.messageHandler = messageHandler;
+        messageHandler.setConnection(this);
     }
 
     public void setHostName(String hostName) {
@@ -58,5 +91,33 @@ public class Connection {
 
     public void setReadTimeout(int readTimeout) {
         this.readTimeout = readTimeout;
+    }
+
+    private void createThread() {
+        this.thread = new Thread() {
+            @Override
+            public void run() {
+                while (!Thread.currentThread().isInterrupted()) {
+                    try {
+                        if (!isConnected()) {
+                            connect(loginAction);
+                        }
+                        while (!Thread.currentThread().isInterrupted()) {
+                            if (messageHandler != null) {
+                                messageHandler.processMessage(reader.readMessage());
+                            }
+                        }
+                    } catch (IOException ex) {
+                        try {
+                            Thread.sleep(1000);
+                        } catch (InterruptedException ex2) {
+                            break;
+                        }
+                    } catch (NotAuthorizedException ignore) {
+                        break;
+                    }
+                }
+            }
+        };
     }
 }
