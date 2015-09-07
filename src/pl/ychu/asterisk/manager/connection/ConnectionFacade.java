@@ -3,7 +3,7 @@ package pl.ychu.asterisk.manager.connection;
 import pl.ychu.asterisk.manager.*;
 import pl.ychu.asterisk.manager.action.AbstractAction;
 import pl.ychu.asterisk.manager.action.Action;
-import pl.ychu.asterisk.manager.action.ActionIdGenerator;
+import pl.ychu.asterisk.manager.action.ActionIdGeneratorImpl;
 import pl.ychu.asterisk.manager.action.ResponseHandler;
 import pl.ychu.asterisk.manager.exception.NotAuthorizedException;
 import pl.ychu.asterisk.manager.exception.NotConnectedException;
@@ -12,7 +12,7 @@ import java.io.IOException;
 
 public class ConnectionFacade {
     private final Connection connection;
-    private final ActionIdGenerator actionIdFactory;
+    private final ActionIdGeneratorImpl actionIdFactory;
     private Thread mainThread;
     private Writer writer;
     private boolean working;
@@ -21,7 +21,7 @@ public class ConnectionFacade {
 
     public ConnectionFacade(Connection connection, Action loginAction) {
         this.connection = connection;
-        this.actionIdFactory = new ActionIdGenerator();
+        this.actionIdFactory = new ActionIdGeneratorImpl();
         this.createThread();
         this.loginAction = loginAction;
     }
