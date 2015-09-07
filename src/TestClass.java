@@ -2,7 +2,6 @@ import pl.ychu.asterisk.manager.*;
 import pl.ychu.asterisk.manager.action.Action;
 import pl.ychu.asterisk.manager.action.ResponseParserImpl;
 import pl.ychu.asterisk.manager.connection.Connection;
-import pl.ychu.asterisk.manager.connection.ConnectionConfiguration;
 import pl.ychu.asterisk.manager.connection.ConnectionFacade;
 import pl.ychu.asterisk.manager.event.*;
 import pl.ychu.asterisk.manager.exception.NotAuthorizedException;
@@ -14,11 +13,10 @@ import java.util.regex.Pattern;
 
 public class TestClass {
     public static void main(String[] args) throws IOException, InterruptedException, TimeoutException, NotAuthorizedException, NotConnectedException {
-        ConnectionConfiguration configuration = new ConnectionConfiguration();
         Connection connection = new Connection();
         Action loginAction = new Action("Login");
-        loginAction.putVariable("username", configuration.getUserName());
-        loginAction.putVariable("secret", configuration.getUserPassword());
+        loginAction.putVariable("username", "admin");
+        loginAction.putVariable("secret", "secret");
         ConnectionFacade conn = new ConnectionFacade(connection, loginAction);
         MessageProcessorImpl messageProcessor = new MessageProcessorImpl();
         EventProcessor<Event> eventProcessor = new EventProcessor<>();
