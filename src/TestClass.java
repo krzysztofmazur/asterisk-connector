@@ -19,7 +19,7 @@ public class TestClass {
         Action loginAction = new Action("Login");
         loginAction.putVariable("username", configuration.getUserName());
         loginAction.putVariable("secret", configuration.getUserPassword());
-        ConnectionFacade conn = new ConnectionFacade(connection, configuration, loginAction);
+        ConnectionFacade conn = new ConnectionFacade(connection, loginAction);
         MessageProcessorImpl messageProcessor = new MessageProcessorImpl();
         EventProcessor<Event> eventProcessor = new EventProcessor<>();
         eventProcessor.setPattern(Pattern.compile("^.*"));

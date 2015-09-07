@@ -13,16 +13,14 @@ import java.io.IOException;
 public class ConnectionFacade {
     private final Connection connection;
     private final ActionIdGenerator actionIdFactory;
-    private ConnectionConfiguration connectionConfiguration;
     private Thread mainThread;
     private Writer writer;
     private boolean working;
     private MessageProcessor msgProcessor;
     private Action loginAction;
 
-    public ConnectionFacade(Connection connection, ConnectionConfiguration connectionConfiguration, Action loginAction) {
+    public ConnectionFacade(Connection connection, Action loginAction) {
         this.connection = connection;
-        this.connectionConfiguration = connectionConfiguration;
         this.actionIdFactory = new ActionIdGenerator();
         this.createThread();
         this.loginAction = loginAction;
@@ -30,6 +28,10 @@ public class ConnectionFacade {
 
     public void setMessageProcessor(MessageProcessor messageProcessor) {
         this.msgProcessor = messageProcessor;
+    }
+
+    public MessageProcessor getMessageProcessor() {
+        return this.msgProcessor;
     }
 
     public void sendAction(AbstractAction action) throws IOException {
