@@ -28,6 +28,7 @@ public class TestClass {
         loginAction.putVariable("secret", "secret");
 
         Connection connection = new Connection();
+        //connection.setSsl(true);
         connection.registerMessageHandler(messageHandler);
         connection.registerMessageListener(new MessageListener() {
             @Override

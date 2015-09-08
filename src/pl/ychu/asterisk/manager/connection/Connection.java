@@ -2,6 +2,8 @@ package pl.ychu.asterisk.manager.connection;
 
 import pl.ychu.asterisk.manager.exception.NotAuthorizedException;
 
+import javax.net.SocketFactory;
+import javax.net.ssl.SSLSocketFactory;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
@@ -13,6 +15,7 @@ public class Connection {
     protected int hostPort = 5038;
     protected int connectionTimeout = 5000;
     protected int readTimeout = 30000;
+    protected boolean ssl = false;
 
     protected Socket client;
     protected Reader reader;
@@ -31,7 +34,11 @@ public class Connection {
     }
 
     public void connect(String loginAction) throws IOException, NotAuthorizedException {
-        this.client = new Socket();
+        if (this.ssl) {
+            this.client = SSLSocketFactory.getDefault().createSocket();
+        } else {
+            this.client = SocketFactory.getDefault().createSocket();
+        }
         this.client.setSoTimeout(this.readTimeout * 2);
         this.client.connect(new InetSocketAddress(
                 hostName,
@@ -107,6 +114,10 @@ public class Connection {
 
     public void setReadTimeout(int readTimeout) {
         this.readTimeout = readTimeout;
+    }
+
+    public void setSsl(boolean ssl) {
+        this.ssl = ssl;
     }
 
     protected void createThread() {
