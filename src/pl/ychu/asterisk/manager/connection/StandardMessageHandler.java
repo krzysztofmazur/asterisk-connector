@@ -51,9 +51,9 @@ public class StandardMessageHandler implements MessageHandler {
     @Override
     public void processMessage(String message) {
         if (responsePattern.matcher(message).find() || actionIdPattern.matcher(message).find()) {
-            processResponse(message);
+            this.processResponse(message);
         } else if (eventPattern.matcher(message).find()) {
-            processEvent(message);
+            this.processEvent(message);
         }
     }
 
@@ -63,35 +63,35 @@ public class StandardMessageHandler implements MessageHandler {
     }
 
     private void processEvent(String message) {
-        for (EventProcessor eventProcessor : eventProcessorRepository.getMatchedProcessors(message)) {
+        for (EventProcessor eventProcessor : this.eventProcessorRepository.getMatchedProcessors(message)) {
             eventProcessor.processMessage(message);
         }
     }
 
     private void processResponse(String message) {
-        if (responseParser != null) {
-            Response r = responseParser.parse(message);
-            ResponseHandler handler = responseHandlers.get(r.getActionId());
+        if (this.responseParser != null) {
+            Response r = this.responseParser.parse(message);
+            ResponseHandler handler = this.responseHandlers.get(r.getActionId());
             if (handler != null) {
                 handler.handleResponse(r);
-            } else if (defaultResponseHandler != null) {
-                defaultResponseHandler.handleResponse(r);
+            } else if (this.defaultResponseHandler != null) {
+                this.defaultResponseHandler.handleResponse(r);
             }
         }
     }
 
     public void sendAction(AbstractAction action) throws IOException, NotConnectedException {
-        if (!connection.isConnected()) {
+        if (!this.connection.isConnected()) {
             throw new NotConnectedException("Not connected to asterisk.");
         }
-        connection.getWriter().send(action);
+        this.connection.getWriter().send(action);
     }
 
     public void sendAction(AbstractAction action, ResponseHandler handler) throws IOException, NotConnectedException {
         if (this.actionIdGenerator == null) {
             throw new IllegalStateException("Set ActionIdGenerator before you send action with response handler.");
         }
-        responseHandlers.put(action.getActionId(), handler);
+        this.responseHandlers.put(action.getActionId(), handler);
         this.sendAction(action);
     }
 
@@ -99,12 +99,12 @@ public class StandardMessageHandler implements MessageHandler {
         private List<EventProcessor> eventProcessorList;
 
         public EventProcessorRepository() {
-            eventProcessorList = new LinkedList<>();
+            this.eventProcessorList = new LinkedList<>();
         }
 
         public List<EventProcessor> getMatchedProcessors(String message) {
             List<EventProcessor> result = new ArrayList<>();
-            for (EventProcessor processor : eventProcessorList) {
+            for (EventProcessor processor : this.eventProcessorList) {
                 if (processor.getPattern().matcher(message).find()) {
                     result.add(processor);
                 }
@@ -113,7 +113,7 @@ public class StandardMessageHandler implements MessageHandler {
         }
 
         public void addEventProcessor(EventProcessor eventProcessor) {
-            eventProcessorList.add(eventProcessor);
+            this.eventProcessorList.add(eventProcessor);
         }
     }
 }

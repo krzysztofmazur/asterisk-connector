@@ -14,7 +14,7 @@ public abstract class AbstractAction {
 
     protected String getActionIdLine() {
         if (this.actionId != null) {
-            return "ActionID: " + actionId + "\n";
+            return String.format("ActionID: %s\n", this.actionId);
         } else {
             return "";
         }
@@ -23,7 +23,7 @@ public abstract class AbstractAction {
     protected abstract String getMessage();
 
     public String toString() {
-        return this.getMessage() + this.getActionIdLine() + "\n";
+        return String.format("%s%s\n", this.getMessage(), this.getActionIdLine());
     }
 
     public byte[] getBytes() {

@@ -8,18 +8,18 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 
 public class Connection {
-    private String hostName = "127.0.0.1";
-    private int hostPort = 5038;
-    private int connectionTimeout = 5000;
-    private int readTimeout = 30000;
+    protected String hostName = "127.0.0.1";
+    protected int hostPort = 5038;
+    protected int connectionTimeout = 5000;
+    protected int readTimeout = 30000;
 
-    private Socket client;
-    private Reader reader;
-    private Writer writer;
-    private Thread thread;
+    protected Socket client;
+    protected Reader reader;
+    protected Writer writer;
+    protected Thread thread;
 
-    private MessageHandler messageHandler;
-    private AbstractAction loginAction;
+    protected MessageHandler messageHandler;
+    protected AbstractAction loginAction;
 
     public Connection() {
         this.createThread();
@@ -40,7 +40,7 @@ public class Connection {
         this.thread.start();
     }
 
-    private void login(AbstractAction loginAction) throws IOException, NotAuthorizedException {
+    protected void login(AbstractAction loginAction) throws IOException, NotAuthorizedException {
         this.loginAction = loginAction;
         this.writer.send(loginAction);
         if (!this.reader.readMessage().contains("Success")) {
@@ -92,7 +92,7 @@ public class Connection {
         this.readTimeout = readTimeout;
     }
 
-    private void createThread() {
+    protected void createThread() {
         this.thread = new Thread() {
             @Override
             public void run() {

@@ -28,11 +28,17 @@ public class Action extends AbstractAction {
 
     @Override
     protected String getMessage() {
-        String message = "Action: " + actionName + "\n";
+        StringBuilder sb = new StringBuilder();
+        sb.append("Action: ");
+        sb.append(this.actionName);
+        sb.append("\n");
         for (Variable variable : variableList) {
-            message += variable.getName() + ": " + variable.getValue() + "\n";
+            sb.append(variable.getName());
+            sb.append(": ");
+            sb.append(variable.getValue());
+            sb.append("\n");
         }
-        return message;
+        return sb.toString();
     }
 
     private class Variable {

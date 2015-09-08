@@ -17,10 +17,10 @@ public class Writer {
     }
 
     public synchronized void send(AbstractAction action) throws IOException {
-        os.write(action.getBytes());
+        this.os.write(action.getBytes());
     }
 
     public synchronized void close() throws IOException {
-        os.close();
+        this.os.close();
     }
 }
