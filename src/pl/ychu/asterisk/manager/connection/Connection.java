@@ -17,7 +17,9 @@ public class Connection {
     protected Writer writer;
     protected Thread thread;
 
+    protected MessageHandler messageHandler;
     protected MessageListener messageListener;
+
     protected String loginAction;
 
     public Connection() {
@@ -58,12 +60,24 @@ public class Connection {
         return this.client.isConnected();
     }
 
-    public Reader getReader() {
-        return this.reader;
+    public String readMessage() throws IOException {
+        return this.reader.readMessage();
     }
 
-    public Writer getWriter() {
-        return this.writer;
+    public void sendMessage(String message) throws IOException {
+        this.writer.send(message);
+        if (messageListener != null) {
+            this.messageListener.onOutgoingMessage(message);
+        }
+    }
+
+    public MessageHandler getMessageHandler() {
+        return messageHandler;
+    }
+
+    public void setMessageHandler(MessageHandler messageHandler) {
+        this.messageHandler = messageHandler;
+        messageHandler.setConnection(this);
     }
 
     public MessageListener getMessageListener() {
@@ -72,7 +86,6 @@ public class Connection {
 
     public void setMessageListener(MessageListener messageListener) {
         this.messageListener = messageListener;
-        messageListener.setConnection(this);
     }
 
     public void setHostName(String hostName) {
@@ -101,8 +114,12 @@ public class Connection {
                             connect(loginAction);
                         }
                         while (!Thread.currentThread().isInterrupted()) {
+                            String message = readMessage();
+                            if (messageHandler != null) {
+                                messageHandler.processMessage(message);
+                            }
                             if (messageListener != null) {
-                                messageListener.processMessage(reader.readMessage());
+                                messageListener.onIncomingMessage(message);
                             }
                         }
                     } catch (IOException ex) {

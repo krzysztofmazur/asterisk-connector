@@ -1,7 +1,7 @@
 package pl.ychu.asterisk.manager.connection;
 
 public interface MessageListener {
-    void processMessage(String message);
+    void onIncomingMessage(String message);
 
-    void setConnection(Connection connection);
+    void onOutgoingMessage(String message);
 }

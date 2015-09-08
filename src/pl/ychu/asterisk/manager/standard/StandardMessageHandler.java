@@ -2,7 +2,7 @@ package pl.ychu.asterisk.manager.standard;
 
 import pl.ychu.asterisk.manager.standard.action.*;
 import pl.ychu.asterisk.manager.connection.Connection;
-import pl.ychu.asterisk.manager.connection.MessageListener;
+import pl.ychu.asterisk.manager.connection.MessageHandler;
 import pl.ychu.asterisk.manager.standard.event.EventProcessor;
 import pl.ychu.asterisk.manager.exception.NotConnectedException;
 
@@ -10,7 +10,7 @@ import java.io.IOException;
 import java.util.*;
 import java.util.regex.Pattern;
 
-public class StandardMessageListener implements MessageListener {
+public class StandardMessageHandler implements MessageHandler {
 
     private Connection connection;
 
@@ -25,7 +25,7 @@ public class StandardMessageListener implements MessageListener {
     private ResponseListener defaultResponseListener;
     private ResponseParser responseParser;
 
-    public StandardMessageListener() {
+    public StandardMessageHandler() {
         this.responseHandlers = new HashMap<>();
         this.eventPattern = Pattern.compile("^(Event:).*");
         this.responsePattern = Pattern.compile("^.*(Response:).*");
@@ -86,7 +86,7 @@ public class StandardMessageListener implements MessageListener {
         if (!this.connection.isConnected()) {
             throw new NotConnectedException("Not connected to asterisk.");
         }
-        this.connection.getWriter().send(action.toString());
+        this.connection.sendMessage(action.toString());
     }
 
     public void sendAction(AbstractAction action, ResponseListener handler) throws IOException, NotConnectedException {

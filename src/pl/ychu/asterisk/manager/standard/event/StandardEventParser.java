@@ -7,7 +7,7 @@ public class StandardEventParser implements EventParser<Event> {
 
         for (String line : message.split("\n")) {
             String[] lineS = line.split(":", 2);
-            if (lineS[0].contains("Event")) {
+            if (line.contains("Event:")) {
                 event.setEventName(lineS[1].trim());
             }
             if (line.equals("") || lineS.length == 1) {
