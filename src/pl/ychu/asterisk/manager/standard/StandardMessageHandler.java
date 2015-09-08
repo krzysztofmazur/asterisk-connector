@@ -1,5 +1,6 @@
 package pl.ychu.asterisk.manager.standard;
 
+import pl.ychu.asterisk.manager.exception.NotAuthorizedException;
 import pl.ychu.asterisk.manager.standard.action.*;
 import pl.ychu.asterisk.manager.connection.Connection;
 import pl.ychu.asterisk.manager.connection.MessageHandler;
@@ -80,6 +81,10 @@ public class StandardMessageHandler implements MessageHandler {
                 this.defaultResponseListener.onResponse(r);
             }
         }
+    }
+
+    public void connect(AbstractAction loginAction) throws IOException, NotAuthorizedException {
+        this.connection.connect(loginAction.toString());
     }
 
     public void sendAction(AbstractAction action) throws IOException, NotConnectedException {

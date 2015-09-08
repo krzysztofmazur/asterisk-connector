@@ -16,13 +16,13 @@ public class TestClass {
     public static void main(String[] args) throws IOException, InterruptedException, TimeoutException, NotAuthorizedException, NotConnectedException {
         StandardMessageHandler messageHandler = new StandardMessageHandler();
         messageHandler.setActionIdGenerator(new ActionIdGenerator());
-        messageHandler.setDefaultResponseListener(response1 -> System.out.println(response1.getResponseStatus()));
+        //messageHandler.setDefaultResponseListener(response1 -> System.out.println(response1.getResponseStatus()));
         messageHandler.setResponseParser(new ResponseParserImpl());
-        EventProcessor<Event> eventProcessor = new EventProcessor<>();
+        /*EventProcessor<Event> eventProcessor = new EventProcessor<>();
         eventProcessor.setPattern(Pattern.compile("^.*"));
         eventProcessor.setParser(new StandardEventParser());
         eventProcessor.setListener(event -> System.out.println(event.getEventName()));
-        messageHandler.addEventProcessor(eventProcessor);
+        messageHandler.addEventProcessor(eventProcessor);*/
         Action loginAction = new Action("Login");
         loginAction.putVariable("username", "admin");
         loginAction.putVariable("secret", "secret");
@@ -40,8 +40,8 @@ public class TestClass {
                 System.out.println(message);
             }
         });
-        connection.connect(loginAction.toString());
-        messageHandler.sendAction(new Action("QueueStatus"), response -> System.out.println(response.getResponseStatus()));
+        messageHandler.connect(loginAction);
+        //messageHandler.sendAction(new Action("QueueStatus"), response -> System.out.println(response.getResponseStatus()));
         (new Thread(new PingThread(messageHandler))).start();
     }
 
