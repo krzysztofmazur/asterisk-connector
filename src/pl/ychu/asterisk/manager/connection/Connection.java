@@ -5,6 +5,8 @@ import pl.ychu.asterisk.manager.exception.NotAuthorizedException;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Connection {
     protected String hostName = "127.0.0.1";
@@ -17,12 +19,14 @@ public class Connection {
     protected Writer writer;
     protected Thread thread;
 
-    protected MessageHandler messageHandler;
-    protected MessageListener messageListener;
+    protected List<MessageHandler> messageHandlers;
+    protected List<MessageListener> messageListeners;
 
     protected String loginAction;
 
     public Connection() {
+        this.messageHandlers = new ArrayList<>();
+        this.messageListeners = new ArrayList<>();
         this.createThread();
     }
 
@@ -66,26 +70,27 @@ public class Connection {
 
     public void sendMessage(String message) throws IOException {
         this.writer.send(message);
-        if (messageListener != null) {
-            this.messageListener.onOutgoingMessage(message);
+        for (MessageListener messageListener : this.messageListeners) {
+            messageListener.onOutgoingMessage(message);
         }
     }
 
-    public MessageHandler getMessageHandler() {
-        return messageHandler;
-    }
-
-    public void setMessageHandler(MessageHandler messageHandler) {
-        this.messageHandler = messageHandler;
+    public void registerMessageHandler(MessageHandler messageHandler) {
+        this.messageHandlers.add(messageHandler);
         messageHandler.setConnection(this);
     }
 
-    public MessageListener getMessageListener() {
-        return messageListener;
+    public boolean removeMessageHandler(MessageHandler messageHandler) {
+        messageHandler.setConnection(null);
+        return this.messageHandlers.remove(messageHandler);
     }
 
-    public void setMessageListener(MessageListener messageListener) {
-        this.messageListener = messageListener;
+    public void registerMessageListener(MessageListener messageListener) {
+        this.messageListeners.add(messageListener);
+    }
+
+    public boolean removeMessageListener(MessageListener messageListener) {
+        return this.messageListeners.remove(messageListener);
     }
 
     public void setHostName(String hostName) {
@@ -115,10 +120,10 @@ public class Connection {
                         }
                         while (!Thread.currentThread().isInterrupted()) {
                             String message = readMessage();
-                            if (messageHandler != null) {
+                            for (MessageHandler messageHandler : messageHandlers) {
                                 messageHandler.processMessage(message);
                             }
-                            if (messageListener != null) {
+                            for (MessageListener messageListener : messageListeners) {
                                 messageListener.onIncomingMessage(message);
                             }
                         }

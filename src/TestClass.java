@@ -28,8 +28,8 @@ public class TestClass {
         loginAction.putVariable("secret", "secret");
 
         Connection connection = new Connection();
-        connection.setMessageHandler(messageHandler);
-        connection.setMessageListener(new MessageListener() {
+        connection.registerMessageHandler(messageHandler);
+        connection.registerMessageListener(new MessageListener() {
             @Override
             public void onIncomingMessage(String message) {
                 System.out.println(message);
