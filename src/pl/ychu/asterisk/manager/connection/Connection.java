@@ -17,7 +17,7 @@ public class Connection {
     protected Writer writer;
     protected Thread thread;
 
-    protected MessageHandler messageHandler;
+    protected MessageListener messageListener;
     protected String loginAction;
 
     public Connection() {
@@ -66,13 +66,13 @@ public class Connection {
         return this.writer;
     }
 
-    public MessageHandler getMessageHandler() {
-        return messageHandler;
+    public MessageListener getMessageListener() {
+        return messageListener;
     }
 
-    public void setMessageHandler(MessageHandler messageHandler) {
-        this.messageHandler = messageHandler;
-        messageHandler.setConnection(this);
+    public void setMessageListener(MessageListener messageListener) {
+        this.messageListener = messageListener;
+        messageListener.setConnection(this);
     }
 
     public void setHostName(String hostName) {
@@ -101,8 +101,8 @@ public class Connection {
                             connect(loginAction);
                         }
                         while (!Thread.currentThread().isInterrupted()) {
-                            if (messageHandler != null) {
-                                messageHandler.processMessage(reader.readMessage());
+                            if (messageListener != null) {
+                                messageListener.processMessage(reader.readMessage());
                             }
                         }
                     } catch (IOException ex) {

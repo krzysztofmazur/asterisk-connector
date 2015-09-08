@@ -2,7 +2,7 @@ import pl.ychu.asterisk.manager.standard.action.Action;
 import pl.ychu.asterisk.manager.standard.action.ActionIdGenerator;
 import pl.ychu.asterisk.manager.standard.action.ResponseParserImpl;
 import pl.ychu.asterisk.manager.connection.Connection;
-import pl.ychu.asterisk.manager.standard.StandardMessageHandler;
+import pl.ychu.asterisk.manager.standard.StandardMessageListener;
 import pl.ychu.asterisk.manager.standard.event.*;
 import pl.ychu.asterisk.manager.exception.NotAuthorizedException;
 import pl.ychu.asterisk.manager.exception.NotConnectedException;
@@ -13,7 +13,7 @@ import java.util.regex.Pattern;
 
 public class TestClass {
     public static void main(String[] args) throws IOException, InterruptedException, TimeoutException, NotAuthorizedException, NotConnectedException {
-        StandardMessageHandler messageHandler = new StandardMessageHandler();
+        StandardMessageListener messageHandler = new StandardMessageListener();
         messageHandler.setActionIdGenerator(new ActionIdGenerator());
         messageHandler.setDefaultResponseHandler(response1 -> System.out.println(response1.getResponseStatus()));
         messageHandler.setResponseParser(new ResponseParserImpl());
@@ -27,7 +27,7 @@ public class TestClass {
         loginAction.putVariable("secret", "secret");
 
         Connection connection = new Connection();
-        connection.setMessageHandler(messageHandler);
+        connection.setMessageListener(messageHandler);
         connection.connect(loginAction.toString());
         messageHandler.sendAction(new Action("QueueStatus"), response -> System.out.println(response.getResponseStatus()));
         (new Thread(new PingThread(messageHandler))).start();
@@ -35,9 +35,9 @@ public class TestClass {
 
     private static class PingThread implements Runnable {
 
-        private StandardMessageHandler messageHandler;
+        private StandardMessageListener messageHandler;
 
-        public PingThread(StandardMessageHandler messageHandler) {
+        public PingThread(StandardMessageListener messageHandler) {
             this.messageHandler = messageHandler;
         }
 

@@ -2,7 +2,7 @@ package pl.ychu.asterisk.manager.standard;
 
 import pl.ychu.asterisk.manager.standard.action.*;
 import pl.ychu.asterisk.manager.connection.Connection;
-import pl.ychu.asterisk.manager.connection.MessageHandler;
+import pl.ychu.asterisk.manager.connection.MessageListener;
 import pl.ychu.asterisk.manager.standard.event.EventProcessor;
 import pl.ychu.asterisk.manager.exception.NotConnectedException;
 
@@ -10,7 +10,7 @@ import java.io.IOException;
 import java.util.*;
 import java.util.regex.Pattern;
 
-public class StandardMessageHandler implements MessageHandler {
+public class StandardMessageListener implements MessageListener {
 
     private Connection connection;
 
@@ -25,7 +25,7 @@ public class StandardMessageHandler implements MessageHandler {
     private ResponseHandler defaultResponseHandler;
     private ResponseParser responseParser;
 
-    public StandardMessageHandler() {
+    public StandardMessageListener() {
         this.responseHandlers = new HashMap<>();
         this.eventPattern = Pattern.compile("^(Event:).*");
         this.responsePattern = Pattern.compile("^.*(Response:).*");
