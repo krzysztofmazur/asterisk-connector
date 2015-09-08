@@ -15,12 +15,12 @@ public class TestClass {
     public static void main(String[] args) throws IOException, InterruptedException, TimeoutException, NotAuthorizedException, NotConnectedException {
         StandardMessageListener messageHandler = new StandardMessageListener();
         messageHandler.setActionIdGenerator(new ActionIdGenerator());
-        messageHandler.setDefaultResponseHandler(response1 -> System.out.println(response1.getResponseStatus()));
+        messageHandler.setDefaultResponseListener(response1 -> System.out.println(response1.getResponseStatus()));
         messageHandler.setResponseParser(new ResponseParserImpl());
         EventProcessor<Event> eventProcessor = new EventProcessor<>();
         eventProcessor.setPattern(Pattern.compile("^.*"));
         eventProcessor.setParser(new StandardEventParser());
-        eventProcessor.setHandler(event -> System.out.println(event.getEventName()));
+        eventProcessor.setListener(event -> System.out.println(event.getEventName()));
         messageHandler.addEventProcessor(eventProcessor);
         Action loginAction = new Action("Login");
         loginAction.putVariable("username", "admin");

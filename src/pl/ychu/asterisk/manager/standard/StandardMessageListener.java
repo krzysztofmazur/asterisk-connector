@@ -21,8 +21,8 @@ public class StandardMessageListener implements MessageListener {
     private ActionIdGeneratorInterface actionIdGenerator;
 
     private EventProcessorRepository eventProcessorRepository;
-    private HashMap<String, ResponseHandler> responseHandlers;
-    private ResponseHandler defaultResponseHandler;
+    private HashMap<String, ResponseListener> responseHandlers;
+    private ResponseListener defaultResponseListener;
     private ResponseParser responseParser;
 
     public StandardMessageListener() {
@@ -38,8 +38,8 @@ public class StandardMessageListener implements MessageListener {
         eventProcessorRepository.addEventProcessor(eventProcessor);
     }
 
-    public void setDefaultResponseHandler(ResponseHandler defaultResponseHandler) {
-        this.defaultResponseHandler = defaultResponseHandler;
+    public void setDefaultResponseListener(ResponseListener defaultResponseListener) {
+        this.defaultResponseListener = defaultResponseListener;
     }
 
     public void setResponseParser(ResponseParser responseParser) {
@@ -73,11 +73,11 @@ public class StandardMessageListener implements MessageListener {
     private void processResponse(String message) {
         if (this.responseParser != null) {
             Response r = this.responseParser.parse(message);
-            ResponseHandler handler = this.responseHandlers.get(r.getActionId());
+            ResponseListener handler = this.responseHandlers.get(r.getActionId());
             if (handler != null) {
-                handler.handleResponse(r);
-            } else if (this.defaultResponseHandler != null) {
-                this.defaultResponseHandler.handleResponse(r);
+                handler.onResponse(r);
+            } else if (this.defaultResponseListener != null) {
+                this.defaultResponseListener.onResponse(r);
             }
         }
     }
@@ -89,7 +89,7 @@ public class StandardMessageListener implements MessageListener {
         this.connection.getWriter().send(action.toString());
     }
 
-    public void sendAction(AbstractAction action, ResponseHandler handler) throws IOException, NotConnectedException {
+    public void sendAction(AbstractAction action, ResponseListener handler) throws IOException, NotConnectedException {
         if (this.actionIdGenerator == null) {
             throw new IllegalStateException("Set ActionIdGenerator before you send action with response handler.");
         }

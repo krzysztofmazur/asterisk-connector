@@ -3,7 +3,7 @@ package pl.ychu.asterisk.manager.standard.event;
 import java.util.regex.Pattern;
 
 public class EventProcessor<T> {
-    private EventHandler<T> handler;
+    private EventListener<T> listener;
     private EventParser<T> parser;
     private Pattern pattern;
 
@@ -19,12 +19,12 @@ public class EventProcessor<T> {
         this.parser = parser;
     }
 
-    public void setHandler(EventHandler<T> handler) {
-        this.handler = handler;
+    public void setListener(EventListener<T> listener) {
+        this.listener = listener;
     }
 
-    public EventHandler<T> getHandler() {
-        return handler;
+    public EventListener<T> getListener() {
+        return listener;
     }
 
     public EventParser<T> getParser() {
@@ -33,6 +33,6 @@ public class EventProcessor<T> {
 
     public void processMessage(String message) {
         T event = this.getParser().parse(message);
-        this.getHandler().handle(event);
+        this.getListener().onEvent(event);
     }
 }

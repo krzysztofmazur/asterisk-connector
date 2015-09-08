@@ -12,8 +12,7 @@ public class ResponseParserImpl implements ResponseParser {
                     response.addVariable(lineS[0].trim(), lineS[1].trim());
                 }
             } else {
-                sb.append(line);
-                sb.append("\n");
+                sb.append(line).append("\n");
             }
         }
         if (sb.length() != 0) {
