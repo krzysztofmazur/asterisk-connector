@@ -1,4 +1,4 @@
-package pl.ychu.asterisk.manager.action;
+package pl.ychu.asterisk.manager.standard.action;
 
 import java.util.HashMap;
 

@@ -1,7 +1,5 @@
 package pl.ychu.asterisk.manager.connection;
 
-import pl.ychu.asterisk.manager.action.AbstractAction;
-
 import java.io.IOException;
 import java.io.OutputStream;
 
@@ -16,7 +14,7 @@ public class Writer {
         this.os = os;
     }
 
-    public synchronized void send(AbstractAction action) throws IOException {
+    public synchronized void send(String action) throws IOException {
         this.os.write(action.getBytes());
     }
 

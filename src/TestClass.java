@@ -1,9 +1,9 @@
-import pl.ychu.asterisk.manager.action.Action;
-import pl.ychu.asterisk.manager.action.ActionIdGenerator;
-import pl.ychu.asterisk.manager.action.ResponseParserImpl;
+import pl.ychu.asterisk.manager.standard.action.Action;
+import pl.ychu.asterisk.manager.standard.action.ActionIdGenerator;
+import pl.ychu.asterisk.manager.standard.action.ResponseParserImpl;
 import pl.ychu.asterisk.manager.connection.Connection;
-import pl.ychu.asterisk.manager.connection.StandardMessageHandler;
-import pl.ychu.asterisk.manager.event.*;
+import pl.ychu.asterisk.manager.standard.StandardMessageHandler;
+import pl.ychu.asterisk.manager.standard.event.*;
 import pl.ychu.asterisk.manager.exception.NotAuthorizedException;
 import pl.ychu.asterisk.manager.exception.NotConnectedException;
 
@@ -28,7 +28,7 @@ public class TestClass {
 
         Connection connection = new Connection();
         connection.setMessageHandler(messageHandler);
-        connection.connect(loginAction);
+        connection.connect(loginAction.toString());
         messageHandler.sendAction(new Action("QueueStatus"), response -> System.out.println(response.getResponseStatus()));
         (new Thread(new PingThread(messageHandler))).start();
     }

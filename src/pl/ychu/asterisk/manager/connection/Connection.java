@@ -1,6 +1,5 @@
 package pl.ychu.asterisk.manager.connection;
 
-import pl.ychu.asterisk.manager.action.AbstractAction;
 import pl.ychu.asterisk.manager.exception.NotAuthorizedException;
 
 import java.io.IOException;
@@ -19,13 +18,13 @@ public class Connection {
     protected Thread thread;
 
     protected MessageHandler messageHandler;
-    protected AbstractAction loginAction;
+    protected String loginAction;
 
     public Connection() {
         this.createThread();
     }
 
-    public void connect(AbstractAction loginAction) throws IOException, NotAuthorizedException {
+    public void connect(String loginAction) throws IOException, NotAuthorizedException {
         this.client = new Socket();
         this.client.setSoTimeout(this.readTimeout * 2);
         this.client.connect(new InetSocketAddress(
@@ -40,7 +39,7 @@ public class Connection {
         this.thread.start();
     }
 
-    protected void login(AbstractAction loginAction) throws IOException, NotAuthorizedException {
+    protected void login(String loginAction) throws IOException, NotAuthorizedException {
         this.loginAction = loginAction;
         this.writer.send(loginAction);
         if (!this.reader.readMessage().contains("Success")) {

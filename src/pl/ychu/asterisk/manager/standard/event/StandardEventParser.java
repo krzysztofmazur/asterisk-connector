@@ -1,4 +1,4 @@
-package pl.ychu.asterisk.manager.event;
+package pl.ychu.asterisk.manager.standard.event;
 
 public class StandardEventParser implements EventParser<Event> {
     @Override

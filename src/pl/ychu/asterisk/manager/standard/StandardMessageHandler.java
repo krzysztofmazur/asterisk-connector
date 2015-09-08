@@ -1,7 +1,9 @@
-package pl.ychu.asterisk.manager.connection;
+package pl.ychu.asterisk.manager.standard;
 
-import pl.ychu.asterisk.manager.action.*;
-import pl.ychu.asterisk.manager.event.EventProcessor;
+import pl.ychu.asterisk.manager.standard.action.*;
+import pl.ychu.asterisk.manager.connection.Connection;
+import pl.ychu.asterisk.manager.connection.MessageHandler;
+import pl.ychu.asterisk.manager.standard.event.EventProcessor;
 import pl.ychu.asterisk.manager.exception.NotConnectedException;
 
 import java.io.IOException;
@@ -84,7 +86,7 @@ public class StandardMessageHandler implements MessageHandler {
         if (!this.connection.isConnected()) {
             throw new NotConnectedException("Not connected to asterisk.");
         }
-        this.connection.getWriter().send(action);
+        this.connection.getWriter().send(action.toString());
     }
 
     public void sendAction(AbstractAction action, ResponseHandler handler) throws IOException, NotConnectedException {
