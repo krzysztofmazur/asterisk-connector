@@ -34,11 +34,10 @@ public class Connection {
     }
 
     public void connect(String loginAction) throws IOException, NotAuthorizedException {
-        if (this.ssl) {
-            this.client = SSLSocketFactory.getDefault().createSocket();
-        } else {
-            this.client = SocketFactory.getDefault().createSocket();
-        }
+        this.client = this.ssl
+                ? SSLSocketFactory.getDefault().createSocket()
+                : SocketFactory.getDefault().createSocket();
+        
         this.client.setSoTimeout(this.readTimeout * 2);
         this.client.connect(new InetSocketAddress(
                 hostName,
